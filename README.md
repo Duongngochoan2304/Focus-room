@@ -8,7 +8,7 @@
 - Giao diện đơn giản
 
 ## Demo
-https://username.github.io/focus-room/
+
 
 ## Công nghệ
 - HTML, CSS, JavaScript
