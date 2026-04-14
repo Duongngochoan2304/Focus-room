@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Focus Room - Timer</title>
+
+  <!-- CSS đồng hồ -->
+  <link rel="stylesheet" href="style.css">
+  <!-- CSS bảng nhiệm vụ -->
+  <link rel="stylesheet" href="tasks.css">
+  <!-- Font chữ: DM Mono (số/code), Syne (tiêu đề) -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Lớp nhiễu texture nền, trang trí -->
+  <div class="noise"></div>
+
+  <!-- ============================================================
+       ĐỒNG HỒ POMODORO — chế độ FULL (hiển thị giữa màn hình)
+       Mặc định bị ẩn, mở ra khi nhấn expand từ mini widget
+  ============================================================ -->
+  <div class="ui" id="uiFull">
+
+    <!-- Thanh tiến trình ngang với các dot mốc -->
+    <div id="progressTrack">
+      <div id="progressLine">
+        <!-- Phần fill màu chạy theo thời gian -->
+        <div id="progressFill"></div>
+      </div>
+      <!-- 6 dot mặc định, sẽ được rebuild theo preset -->
+      <div class="dot" data-index="0"></div>
+      <div class="dot" data-index="1"></div>
+      <div class="dot" data-index="2"></div>
+      <div class="dot" data-index="3"></div>
+      <div class="dot" data-index="4"></div>
+      <div class="dot" data-index="5"></div>
+    </div>
+
+    <!-- Tiêu đề app -->
+    <h1>Focus Room</h1>
+
+    <!-- Khung kính chứa toàn bộ nội dung đồng hồ -->
+    <div id="glassFrame">
+
+      <!-- Vòng tròn SVG timer -->
+      <div id="circleContainer">
+        <svg width="200" height="200" viewBox="0 0 200 200">
+          <!-- Vòng nền mờ -->
+          <circle cx="100" cy="100" r="88" class="bg"></circle>
+          <!-- Vòng tiến trình, stroke-dashoffset thay đổi theo JS -->
+          <circle cx="100" cy="100" r="88" class="progress" id="progressCircle"></circle>
+        </svg>
+        <!-- Số đếm thời gian hiển thị giữa vòng tròn -->
+        <div id="timer">00:00</div>
+      </div>
+
+      <!-- Trạng thái hiện tại: Ready / Focus / Break / Paused / Done -->
+      <div id="status">Ready</div>
+
+      <!-- Các nút chọn chế độ thời gian có sẵn -->
+      <div id="presets">
+        <!-- data-focus: phút focus | data-break: phút nghỉ | data-sessions: số mốc -->
+        <button class="preset-btn active" data-focus="25" data-break="5"  data-sessions="8">Classic</button>
+        <button class="preset-btn"        data-focus="15" data-break="3"  data-sessions="6">Short</button>
+        <button class="preset-btn"        data-focus="50" data-break="10" data-sessions="4">Deep</button>
+        <!-- Nút mở panel nhập tay -->
+        <button class="preset-btn" id="customBtn">Custom</button>
+      </div>
+
+      <!-- Panel nhập thời gian tuỳ chỉnh, ẩn mặc định -->
+      <div id="customPanel">
+        <div class="custom-row">
+          <label>Focus <span class="unit">min</span></label>
+          <input type="number" id="customFocus" value="25" min="1" max="120">
+        </div>
+        <div class="custom-row">
+          <label>Break <span class="unit">min</span></label>
+          <input type="number" id="customBreak" value="5" min="1" max="60">
+        </div>
+        <button id="customApplyBtn">Apply</button>
+      </div>
+
+      <!-- Các nút điều khiển chính -->
+      <div class="controls">
+        <button id="startBtn">&#9654; Start</button>
+        <button id="pauseBtn">&#9208; Pause</button>
+        <button id="resetBtn">&#8634; Reset</button>
+        <!-- Thu đồng hồ về mini widget góc phải -->
+        <button id="clockCollapseBtn" class="secondary">&#8599; Mini</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       ĐỒNG HỒ POMODORO — chế độ MINI (góc trên phải)
+       Mặc định hiển thị, thu gọn chỉ còn số giờ + nút điều khiển
+  ============================================================ -->
+  <div id="miniWidget">
+    <!-- Số đếm thời gian -->
+    <div id="miniTimer">00:00</div>
+    <!-- Trạng thái ngắn gọn -->
+    <div id="miniStatus">Ready</div>
+    <!-- Nút điều khiển mini -->
+    <div class="mini-controls">
+      <button id="miniStartBtn">&#9654;</button>
+      <button id="miniPauseBtn">&#9208;</button>
+      <!-- Mở rộng về full UI -->
+      <button id="miniExpandBtn" title="Mở rộng">&#8601;</button>
+    </div>
+  </div>
+
+  <!-- JS đồng hồ load trước -->
+  <script src="main.js"></script>
+
+
+  <!-- ============================================================
+       BẢNG NHIỆM VỤ — widget góc trên trái
+       Gồm mini bar (mặc định) và panel mở rộng
+  ============================================================ -->
+  <div id="taskWidget">
+
+    <!-- Mini bar: hiển thị xu + số task còn lại -->
+    <div id="miniBar">
+      <!-- Số xu hiện có -->
+      <div id="miniCoin">
+        <span class="coin-icon">◈</span>
+        <span id="miniCoinCount">0</span>
+      </div>
+      <!-- Số nhiệm vụ chưa hoàn thành -->
+      <div id="miniTaskInfo">
+        <span id="miniTaskCount">0</span>
+        <span class="mini-label">tasks</span>
+      </div>
+      <!-- Nút mở panel đầy đủ -->
+      <button id="expandBtn" title="Mở rộng">&#8964;</button>
+    </div>
+
+    <!-- Panel đầy đủ: ẩn mặc định, mở khi nhấn expandBtn -->
+    <div id="taskPanel" class="hidden">
+
+      <!-- Header panel: xu + đồng hồ thực + tab + nút thu -->
+      <div id="panelHeader">
+        <div id="headerLeft">
+          <!-- Tổng xu tích luỹ -->
+          <div id="coinDisplay">
+            <span class="coin-icon">◈</span>
+            <span id="coinCount">0</span>
+            <span class="coin-label">xu</span>
+          </div>
+          <!-- Đồng hồ thời gian thực HH:MM:SS -->
+          <div id="realClock">00:00:00</div>
+        </div>
+        <!-- Tab chuyển giữa Nhiệm vụ và Shop -->
+        <div id="tabBar">
+          <button class="tab active" data-tab="tasks">Nhiệm vụ</button>
+          <button class="tab" data-tab="shop">Shop</button>
+        </div>
+        <!-- Thu panel về mini bar -->
+        <button id="collapseBtn" title="Thu nhỏ">&#8963;</button>
+      </div>
+
+      <!-- Tab Nhiệm vụ -->
+      <div id="tabTasks" class="tab-content active">
+
+        <!-- Nhiệm vụ hệ thống (tự động + thủ công) -->
+        <div class="section-label">Hệ thống</div>
+        <ul id="systemTaskList"></ul>
+
+        <!-- Nhiệm vụ người dùng tự tạo -->
+        <div class="section-label">Của tôi
+          <button id="addTaskBtn">+ Thêm</button>
+        </div>
+        <ul id="userTaskList"></ul>
+
+        <!-- Form thêm nhiệm vụ mới, ẩn mặc định -->
+        <div id="addTaskForm" class="hidden">
+          <input id="taskInput" type="text" placeholder="Tên nhiệm vụ..." maxlength="50" />
+          <div class="form-row">
+            <!-- Chọn mức thưởng xu -->
+            <select id="taskReward">
+              <option value="5">+5 xu (dễ)</option>
+              <option value="10" selected>+10 xu (vừa)</option>
+              <option value="20">+20 xu (khó)</option>
+            </select>
+            <button id="taskConfirm">Thêm</button>
+            <button id="taskCancel" class="secondary">Huỷ</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Shop: hiển thị các item mở khoá bằng xu -->
+      <div id="tabShop" class="tab-content hidden">
+        <div class="shop-grid" id="shopGrid"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- JS nhiệm vụ load sau, lắng nghe event từ main.js -->
+  <script src="tasks.js"></script>
+</body>
+</html>

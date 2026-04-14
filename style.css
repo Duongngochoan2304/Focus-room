@@ -1,0 +1,448 @@
+/* ============================================================
+   style.css — Giao diện đồng hồ Pomodoro
+   Bao gồm: layout nền, full UI, vòng tròn SVG, preset,
+            custom panel, nút điều khiển, mini widget
+============================================================ */
+
+
+/* ===== RESET CƠ BẢN ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Nền tối ấm, căn giữa toàn màn hình */
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Mono', monospace;
+  background: #1a0f0a;
+  color: #f0e6df;
+  overflow: hidden; /* không cho scroll, UI cố định */
+}
+
+/* Lớp texture nhiễu trang trí nền (SVG filter fractalNoise) */
+.noise {
+  position: fixed;
+  inset: 0;
+  pointer-events: none; /* không chặn click */
+  z-index: 0;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+/* Ánh sáng ambient màu cam mờ phía trên */
+body::before {
+  content: '';
+  position: fixed;
+  top: -10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(200, 80, 60, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+
+/* ===== FULL UI (giữa màn hình) ===== */
+.ui {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  transform-origin: center center;
+  /* Animation scale khi show/hide */
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Trạng thái ẩn: thu nhỏ + mờ dần */
+.ui.hidden {
+  opacity: 0;
+  transform: scale(0.85);
+  pointer-events: none; /* không nhận click khi ẩn */
+}
+
+
+/* ===== TIÊU ĐỀ ===== */
+h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(240, 230, 223, 0.45); /* mờ nhạt, không chiếm quá nhiều attention */
+}
+
+
+/* ===== THANH TIẾN TRÌNH ===== */
+#progressTrack {
+  position: relative;
+  width: 360px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Đường line nền mờ phía sau các dot */
+#progressLine {
+  position: absolute;
+  left: 7px;  /* canh từ tâm dot đầu */
+  right: 7px; /* canh đến tâm dot cuối */
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+/* Phần fill màu chạy theo tiến trình thời gian */
+#progressFill {
+  height: 100%;
+  width: 0%;
+  background: #e05c42;
+  border-radius: 2px;
+  transition: width 0.5s ease, background 0.5s ease;
+}
+
+/* Dot mốc trên thanh tiến trình */
+.dot {
+  position: relative;
+  z-index: 2; /* nằm trên đường line */
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #2a1810;  /* màu nền đặc để che đường line bên dưới */
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Dot đang chạy: viền cam, phình nhẹ (scale qua JS) */
+.dot.active {
+  background: #2a1810;
+  border-color: #e05c42;
+  transform: scale(1.25);
+}
+
+/* Dot focus đã xong */
+.dot.done-focus {
+  background: #e05c42;
+  border-color: #e05c42;
+}
+
+/* Dot break đã xong */
+.dot.done-break {
+  background: #e05c42;
+  border-color: #e05c42;
+}
+
+
+/* ===== KHUNG KÍNH (glassmorphism) ===== */
+#glassFrame {
+  background: rgba(180, 170, 160, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(16px);          /* làm mờ nội dung phía sau */
+  -webkit-backdrop-filter: blur(16px);
+  padding: 36px 40px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08), /* ánh sáng viền trên */
+    0 4px 32px rgba(0,0,0,0.25);
+  min-width: 300px;
+}
+
+
+/* ===== VÒNG TRÒN SVG ===== */
+#circleContainer {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
+
+/* SVG xoay -90° để điểm bắt đầu ở đỉnh (12 giờ) thay vì 3 giờ */
+#circleContainer svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: rotate(-90deg);
+  transition: opacity 0.4s ease;
+}
+
+circle {
+  fill: none;
+  stroke-width: 3;
+}
+
+/* Vòng nền mờ */
+.bg {
+  stroke: rgba(255, 255, 255, 0.06);
+}
+
+/* Vòng tiến trình: stroke-dashoffset thay đổi qua JS */
+.progress {
+  stroke: #e05c42;
+  stroke-linecap: round; /* đầu stroke bo tròn */
+  stroke-dasharray: 553; /* ≈ chu vi (2π×88) */
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear, stroke 0.6s ease, filter 0.6s ease;
+}
+
+/* Số đếm thời gian giữa vòng tròn */
+#timer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'DM Mono', monospace;
+  font-size: 38px;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  color: #f0e6df;
+  pointer-events: none; /* không chặn click qua vòng tròn */
+}
+
+
+/* ===== TRẠNG THÁI ===== */
+#status {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(240, 230, 223, 0.4);
+  height: 16px; /* giữ chiều cao cố định để layout không nhảy */
+}
+
+
+/* ===== NÚT PRESET ===== */
+#presets {
+  display: flex;
+  gap: 6px;
+}
+
+.preset-btn {
+  padding: 6px 14px;
+  border: 1px solid rgba(240, 230, 223, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(240, 230, 223, 0.45);
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.preset-btn:hover {
+  background: rgba(224, 92, 66, 0.1);
+  border-color: rgba(224, 92, 66, 0.35);
+  color: rgba(240, 230, 223, 0.8);
+}
+
+/* Preset đang được chọn */
+.preset-btn.active {
+  background: rgba(224, 92, 66, 0.18);
+  border-color: rgba(224, 92, 66, 0.6);
+  color: #f0e6df;
+}
+
+
+/* ===== PANEL CUSTOM (nhập thời gian tự do) ===== */
+#customPanel {
+  display: none; /* ẩn mặc định */
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+}
+
+/* Hiện panel khi có class "visible" */
+#customPanel.visible {
+  display: flex;
+}
+
+.custom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.custom-row label {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: rgba(240,230,223,0.5);
+  text-transform: uppercase;
+}
+
+.unit {
+  color: rgba(240,230,223,0.3);
+  font-size: 9px;
+}
+
+.custom-row input {
+  width: 70px;
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 4px;
+  color: #f0e6df;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  text-align: center;
+  outline: none;
+}
+
+.custom-row input:focus {
+  border-color: rgba(224,92,66,0.5);
+}
+
+#customApplyBtn {
+  padding: 8px;
+  border: 1px solid rgba(224,92,66,0.4);
+  background: rgba(224,92,66,0.12);
+  color: #f0e6df;
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+#customApplyBtn:hover {
+  background: rgba(224,92,66,0.25);
+}
+
+
+/* ===== NÚT ĐIỀU KHIỂN CHÍNH ===== */
+.controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.controls button {
+  padding: 10px 18px;
+  border: 1px solid rgba(240, 230, 223, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(240, 230, 223, 0.75);
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.controls button:hover {
+  background: rgba(224, 92, 66, 0.15);
+  border-color: rgba(224, 92, 66, 0.5);
+  color: #f0e6df;
+}
+
+.controls button:active {
+  transform: scale(0.97);
+}
+
+/* Nút phụ (Mini) — mờ hơn nút chính */
+.controls button.secondary {
+  opacity: 0.5;
+}
+
+.controls button.secondary:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(240, 230, 223, 0.25);
+}
+
+
+/* ===== MINI WIDGET (góc trên phải) ===== */
+#miniWidget {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+  background: rgba(30, 18, 12, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 130px;
+  /* Animation phóng ra từ góc trên phải */
+  transform-origin: top right;
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Trạng thái ẩn: thu nhỏ về góc */
+#miniWidget.hidden {
+  opacity: 0;
+  transform: scale(0.7);
+  pointer-events: none;
+}
+
+/* Số giờ lớn trong mini widget */
+#miniTimer {
+  font-family: 'DM Mono', monospace;
+  font-size: 28px;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  color: #f0e6df;
+}
+
+/* Trạng thái nhỏ */
+#miniStatus {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(240, 230, 223, 0.4);
+}
+
+/* Hàng nút điều khiển mini */
+.mini-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.mini-controls button {
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(240, 230, 223, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(240, 230, 223, 0.7);
+  cursor: pointer;
+  font-size: 12px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.mini-controls button:hover {
+  background: rgba(224, 92, 66, 0.2);
+  border-color: rgba(224, 92, 66, 0.5);
+  color: #f0e6df;
+}
+
+.mini-controls button:active {
+  transform: scale(0.93);
+}

@@ -1,0 +1,556 @@
+/* ============================================================
+   tasks.css — Giao diện bảng nhiệm vụ & shop
+   Bao gồm: widget góc trái, mini bar, panel mở rộng,
+            danh sách task, form thêm task, shop grid,
+            animation xu bay lên
+============================================================ */
+
+
+/* ===== RESET (chỉ áp dụng khi dùng tasks.css độc lập) ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  font-family: 'DM Mono', monospace;
+  background: #1a0f0a;
+  color: #f0e6df;
+  overflow: hidden;
+}
+
+
+/* ===== WIDGET CONTAINER (góc trên trái) ===== */
+#taskWidget {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* mini bar và panel sát nhau */
+}
+
+
+/* ===== MINI BAR ===== */
+/* Luôn hiển thị, chứa: xu + số task + nút expand */
+#miniBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(20, 12, 8, 0.8);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.07);
+  cursor: default;
+  transition: transform 0.2s ease;
+}
+
+/* Phình nhẹ khi hover để gợi ý có thể click */
+#miniBar:hover { transform: scale(1.02); }
+
+/* Phần hiển thị xu */
+#miniCoin {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #f5c842; /* vàng xu */
+}
+
+.coin-icon {
+  font-size: 14px;
+  color: #f5c842;
+}
+
+/* Phần hiển thị số task còn lại */
+#miniTaskInfo {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 12px;
+  color: rgba(240,230,223,0.5);
+  padding-left: 10px;
+  border-left: 1px solid rgba(255,255,255,0.08); /* đường ngăn cách */
+}
+
+#miniTaskCount {
+  font-size: 13px;
+  color: rgba(240,230,223,0.8);
+}
+
+.mini-label { font-size: 10px; letter-spacing: 0.1em; }
+
+/* Nút mở rộng panel — dễ bấm, có border rõ */
+#expandBtn {
+  background: none;
+  border: 1px solid rgba(240,230,223,0.15);
+  color: rgba(240,230,223,0.6);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px 8px;
+  line-height: 1;
+  border-radius: 6px;
+  transition: all 0.2s;
+  margin-left: 4px;
+  min-width: 28px;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#expandBtn:hover {
+  background: rgba(224,92,66,0.15);
+  border-color: rgba(224,92,66,0.4);
+  color: #f0e6df;
+}
+
+
+/* ===== PANEL MỞ RỘNG ===== */
+#taskPanel {
+  margin-top: 6px;
+  width: 300px;
+  background: rgba(20, 12, 8, 0.85);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07);
+  overflow: hidden;
+  transform-origin: top left; /* animation phóng ra từ góc trái */
+  /* Transition cho cả opacity, scale và visibility */
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1), visibility 0.3s;
+  /* Trạng thái mặc định: hiển thị */
+  opacity: 1;
+  transform: scale(1);
+  visibility: visible;
+}
+
+/* Trạng thái ẩn: thu nhỏ về góc trái */
+#taskPanel.hidden {
+  opacity: 0;
+  transform: scale(0.88);
+  pointer-events: none;
+  visibility: hidden;
+}
+
+
+/* ===== HEADER PANEL ===== */
+#panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px 0;
+  gap: 8px;
+}
+
+/* Cột trái: xu + đồng hồ thực */
+#headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 60px;
+}
+
+/* Hiển thị tổng xu */
+#coinDisplay {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #f5c842;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.coin-label {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: rgba(245,200,66,0.6);
+}
+
+/* Đồng hồ thực HH:MM:SS */
+#realClock {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: rgba(240,230,223,0.3);
+}
+
+/* Tab bar chuyển giữa Nhiệm vụ / Shop */
+#tabBar {
+  display: flex;
+  gap: 2px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+  padding: 3px;
+}
+
+.tab {
+  padding: 4px 12px;
+  background: none;
+  border: none;
+  color: rgba(240,230,223,0.4);
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.tab.active {
+  background: rgba(224,92,66,0.2);
+  color: #f0e6df;
+  border: 1px solid rgba(224,92,66,0.3);
+}
+
+/* Nút thu panel về mini bar */
+#collapseBtn {
+  background: none;
+  border: 1px solid rgba(240,230,223,0.12);
+  color: rgba(240,230,223,0.5);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  min-width: 28px;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#collapseBtn:hover {
+  background: rgba(255,255,255,0.06);
+  color: rgba(240,230,223,0.9);
+}
+
+
+/* ===== BADGE AUTO/MANUAL ===== */
+/* Nhãn nhỏ cho biết task tự động hay thủ công */
+.task-badge {
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.05);
+  color: rgba(240,230,223,0.3);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Nút check dạng icon cho task auto (không click được) */
+.task-check.auto {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: none;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: rgba(240,230,223,0.2);
+  cursor: default;
+}
+
+/* Task auto đã hoàn thành: màu teal */
+.task-check.auto.checked {
+  background: #4ea8a0;
+  border-color: #4ea8a0;
+  color: #fff;
+}
+
+
+/* ===== NỘI DUNG TAB ===== */
+.tab-content {
+  padding: 12px 14px 14px;
+  max-height: 380px;
+  overflow-y: auto; /* scroll nếu quá nhiều task */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+.tab-content.hidden { display: none; }
+
+
+/* ===== NHÃN SECTION ===== */
+.section-label {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(240,230,223,0.3);
+  margin: 10px 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-label:first-child { margin-top: 0; }
+
+/* Nút "+ Thêm" bên trong section label */
+.section-label button {
+  background: none;
+  border: 1px solid rgba(224,92,66,0.3);
+  color: rgba(224,92,66,0.7);
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  padding: 2px 8px;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+
+.section-label button:hover {
+  background: rgba(224,92,66,0.1);
+  color: #e05c42;
+}
+
+
+/* ===== DANH SÁCH NHIỆM VỤ ===== */
+ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.task-item:hover { background: rgba(255,255,255,0.06); }
+
+/* Task đã hoàn thành: mờ + gạch ngang */
+.task-item.done {
+  opacity: 0.4;
+  pointer-events: none; /* không click nữa */
+}
+
+.task-item.done .task-name {
+  text-decoration: line-through;
+  color: rgba(240,230,223,0.4);
+}
+
+/* Nút check tròn */
+.task-check {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  transition: all 0.2s;
+  color: transparent; /* ẩn dấu tick cho đến khi hover */
+}
+
+.task-check:hover {
+  border-color: #e05c42;
+  background: rgba(224,92,66,0.1);
+  color: #e05c42;
+}
+
+/* Task đã tick: nền cam đầy */
+.task-item.done .task-check {
+  background: #e05c42;
+  border-color: #e05c42;
+  color: #fff;
+}
+
+/* Tên nhiệm vụ chiếm hết không gian còn lại */
+.task-name {
+  flex: 1;
+  font-size: 12px;
+  color: rgba(240,230,223,0.85);
+  line-height: 1.4;
+}
+
+/* Phần thưởng xu bên phải */
+.task-reward {
+  font-size: 10px;
+  color: #f5c842;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+/* Nút xoá task (chỉ hiện với task người dùng) */
+.task-delete {
+  background: none;
+  border: none;
+  color: rgba(240,230,223,0.2);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 2px;
+  transition: color 0.2s;
+  line-height: 1;
+}
+
+.task-delete:hover { color: rgba(224,92,66,0.7); }
+
+
+/* ===== FORM THÊM NHIỆM VỤ ===== */
+#addTaskForm {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+}
+
+#addTaskForm.hidden { display: none; }
+
+#taskInput {
+  width: 100%;
+  padding: 7px 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
+  color: #f0e6df;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  outline: none;
+}
+
+#taskInput:focus { border-color: rgba(224,92,66,0.4); }
+
+.form-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Dropdown chọn mức thưởng */
+#taskReward {
+  flex: 1;
+  padding: 5px 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
+  color: rgba(240,230,223,0.7);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  outline: none;
+  cursor: pointer;
+}
+
+.form-row button {
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid rgba(224,92,66,0.4);
+  background: rgba(224,92,66,0.15);
+  color: #f0e6df;
+}
+
+.form-row button:hover { background: rgba(224,92,66,0.28); }
+
+/* Nút Huỷ */
+.form-row button.secondary {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.1);
+  color: rgba(240,230,223,0.5);
+}
+
+.form-row button.secondary:hover { background: rgba(255,255,255,0.08); }
+
+
+/* ===== SHOP ===== */
+/* Lưới 2 cột hiển thị các item */
+.shop-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.shop-item {
+  padding: 12px 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.shop-item:hover { background: rgba(255,255,255,0.06); }
+
+/* Item chưa mở khoá: mờ */
+.shop-item.locked { opacity: 0.5; }
+
+/* Item đã mở khoá: viền vàng nhạt */
+.shop-item.unlocked {
+  border-color: rgba(245,200,66,0.25);
+  background: rgba(245,200,66,0.05);
+}
+
+.shop-icon { font-size: 20px; line-height: 1; }
+
+.shop-name {
+  font-size: 11px;
+  color: rgba(240,230,223,0.8);
+  line-height: 1.3;
+}
+
+.shop-desc {
+  font-size: 9px;
+  color: rgba(240,230,223,0.35);
+  line-height: 1.4;
+}
+
+/* Giá xu hoặc trạng thái "Đã có" */
+.shop-price {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #f5c842;
+  margin-top: auto; /* đẩy xuống đáy card */
+}
+
+.shop-price.owned {
+  color: rgba(245,200,66,0.5);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+
+/* ===== ANIMATION XU BAY LÊN ===== */
+@keyframes coinPop {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-30px) scale(1.3); }
+}
+
+/* Element được tạo động qua JS khi nhận xu */
+.coin-pop {
+  position: fixed;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: #f5c842;
+  pointer-events: none; /* không chặn click */
+  animation: coinPop 0.9s ease forwards;
+  z-index: 999; /* nằm trên tất cả */
+}
