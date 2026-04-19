@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="style.css">
   <!-- CSS bảng nhiệm vụ -->
   <link rel="stylesheet" href="tasks.css">
+  <!-- CSS calendar + journal -->
+  <link rel="stylesheet" href="journal.css">
   <!-- Font chữ: DM Mono (số/code), Syne (tiêu đề) -->
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 </head>
@@ -200,5 +202,103 @@
 
   <!-- JS nhiệm vụ load sau, lắng nghe event từ main.js -->
   <script src="tasks.js"></script>
+
+
+  <!-- ============================================================
+       CALENDAR + JOURNAL — Cuốn sổ 2 trang
+       Gồm: nút mở/đóng (góc dưới phải), overlay nền mờ,
+            và modal cuốn sổ (trang trái: lịch | trang phải: ghi chú)
+  ============================================================ -->
+
+  <!-- Nút mở journal, cố định góc dưới phải -->
+  <button id="journalToggleBtn" title="Mở nhật ký">📓</button>
+
+  <!-- Overlay nền mờ, click vào để đóng journal -->
+  <div id="journalOverlay"></div>
+
+  <!-- Modal cuốn sổ 2 trang -->
+  <div id="journalModal">
+
+    <!-- ===== TRANG TRÁI: LỊCH ===== -->
+    <div id="calendarPage">
+
+      <!-- Header: điều hướng tháng -->
+      <div id="calendarHeader">
+        <button class="cal-nav-btn" id="calPrevBtn" title="Tháng trước">&#8249;</button>
+        <div id="calendarMonthLabel">Tháng 4 — 2025</div>
+        <button class="cal-nav-btn" id="calNextBtn" title="Tháng sau">&#8250;</button>
+      </div>
+
+      <!-- Hàng nhãn thứ trong tuần (T2 → CN) -->
+      <div id="calendarDayNames">
+        <div class="cal-dayname">T2</div>
+        <div class="cal-dayname">T3</div>
+        <div class="cal-dayname">T4</div>
+        <div class="cal-dayname">T5</div>
+        <div class="cal-dayname">T6</div>
+        <div class="cal-dayname">T7</div>
+        <div class="cal-dayname">CN</div>
+      </div>
+
+      <!-- Lưới ngày trong tháng — được sinh động bằng JS -->
+      <div id="calendarGrid"></div>
+
+    </div>
+
+    <!-- ===== GÁNH SÁCH (binding) ===== -->
+    <div id="bookBinding"></div>
+
+    <!-- ===== TRANG PHẢI: JOURNAL / GHI CHÚ ===== -->
+    <div id="journalPage">
+
+      <!-- Header: ngày được chọn + nút xoá -->
+      <div id="journalDateHeader">
+        <div id="journalSelectedDate">Chọn một ngày</div>
+        <button id="journalClearBtn" title="Xoá ghi chú">Xoá</button>
+      </div>
+
+      <!-- Màn hình chưa chọn ngày nào -->
+      <div id="journalEmptyState">
+        <div class="empty-icon">📅</div>
+        <div class="empty-text">Click vào một ngày<br>để bắt đầu ghi chú</div>
+      </div>
+
+      <!-- Dialog xác nhận xoá — thanh pill nằm ở mép trên giữa modal -->
+    <div id="journalConfirmOverlay">
+      <div id="journalConfirmBox">
+        <div class="confirm-icon">🗑</div>
+        <div class="confirm-text">Xoá ghi chú ngày này?</div>
+        <div class="confirm-divider"></div>
+        <div class="confirm-actions">
+          <button class="confirm-cancel-btn" id="confirmCancelBtn">Huỷ</button>
+          <button class="confirm-delete-btn" id="confirmDeleteBtn">Xoá</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nội dung journal (textarea + footer), ẩn khi chưa chọn ngày -->
+      <div id="journalContent" class="hidden">
+
+        <!-- Ô ghi chú chính — hỗ trợ gõ tự do -->
+        <textarea
+          id="journalTextarea"
+          placeholder="Hôm nay bạn đã làm được gì? Cảm xúc ra sao?..."
+          spellcheck="false"
+        ></textarea>
+
+        <!-- Footer: đếm ký tự + trạng thái lưu -->
+        <div id="journalFooter">
+          <span id="journalCharCount"></span>
+          <span id="journalSaveStatus"></span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- JS journal load cuối cùng -->
+  <script src="journal.js"></script>
 </body>
 </html>

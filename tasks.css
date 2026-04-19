@@ -554,3 +554,105 @@ ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
   animation: coinPop 0.9s ease forwards;
   z-index: 999; /* nằm trên tất cả */
 }
+
+/* ===== SHOP — CÁC TRẠNG THÁI MỞ RỘNG ===== */
+
+/* Item có thể mua được (shop_1 - Custom Timer) */
+.shop-item.buyable {
+  opacity: 1;
+  cursor: default;
+}
+
+/* Item chưa triển khai: hiện tooltip khi hover */
+.shop-item.coming-soon {
+  opacity: 0.45;
+  position: relative;
+  cursor: help; /* con trỏ dấu ? gợi ý có thông tin */
+}
+
+/* Tooltip "Tính năng sẽ sớm phát triển" hiển thị khi hover */
+.shop-item.coming-soon::after {
+  content: "Tính năng sẽ sớm phát triển";
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.92);
+  background: rgba(20, 12, 8, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(240, 230, 223, 0.65);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  padding: 5px 10px;
+  border-radius: 5px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  z-index: 50;
+}
+
+/* Mũi tên nhỏ dưới tooltip */
+.shop-item.coming-soon::before {
+  content: "";
+  position: absolute;
+  bottom: calc(100% + 3px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  z-index: 51;
+}
+
+.shop-item.coming-soon:hover::after,
+.shop-item.coming-soon:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+/* Icon khoá nằm ở góc trên phải icon chính */
+.shop-icon {
+  position: relative;
+  display: inline-block;
+}
+
+.lock-icon {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  font-size: 10px;
+  line-height: 1;
+  filter: grayscale(0.3);
+}
+
+/* Nút mua trong shop */
+.buy-btn {
+  background: rgba(245, 200, 66, 0.12);
+  border: 1px solid rgba(245, 200, 66, 0.4);
+  color: #f5c842;
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.buy-btn:hover {
+  background: rgba(245, 200, 66, 0.24);
+  border-color: rgba(245, 200, 66, 0.7);
+}
+
+/* Nút mua khi không đủ xu */
+.buy-btn.cant-afford {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgba(240, 230, 223, 0.35);
+  background: rgba(255, 255, 255, 0.03);
+}

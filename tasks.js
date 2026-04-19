@@ -255,19 +255,86 @@ function renderShop() {
   shopGrid.innerHTML = "";
 
   SHOP_ITEMS.forEach(item => {
-    const owned = state.shopOwned.includes(item.id);
-    const div   = document.createElement("div");
-    div.className = "shop-item " + (owned ? "unlocked" : "locked");
+    const owned      = state.shopOwned.includes(item.id);
+    const canBuy     = item.id === "shop_1"; // chỉ shop_1 (Custom Timer) đã triển khai
+    const canAfford  = state.coins >= item.price;
+    const div        = document.createElement("div");
+
+    // Phân loại trạng thái: owned / buyable / coming-soon
+    div.className = "shop-item " + (owned ? "unlocked" : canBuy ? "locked buyable" : "locked coming-soon");
+
+    // Tooltip "sẽ sớm phát triển" cho các item chưa triển khai
+    if (!owned && !canBuy) {
+      div.title = "Tính năng sẽ sớm phát triển";
+    }
+
     div.innerHTML = `
-      <div class="shop-icon">${item.icon}</div>
+      <div class="shop-icon">
+        ${item.icon}
+        ${!owned && !canBuy ? '<span class="lock-icon">🔒</span>' : ""}
+      </div>
       <div class="shop-name">${item.name}</div>
       <div class="shop-desc">${item.desc}</div>
       <div class="shop-price ${owned ? "owned" : ""}">
-        ${owned ? "✓ Đã có" : `◈ ${item.price}`}
+        ${owned
+          ? "✓ Đã có"
+          : canBuy
+            ? `<button class="buy-btn ${canAfford ? "" : "cant-afford"}" data-id="${item.id}" data-price="${item.price}">
+                ${canAfford ? `◈ ${item.price} — Mua` : `◈ ${item.price} — Thiếu xu`}
+               </button>`
+            : `◈ ${item.price}`
+        }
       </div>
     `;
+
+    // Gán sự kiện mua cho shop_1
+    if (!owned && canBuy) {
+      const buyBtn = div.querySelector(".buy-btn");
+      if (buyBtn && canAfford) {
+        buyBtn.addEventListener("click", () => purchaseItem(item));
+      }
+    }
+
     shopGrid.appendChild(div);
   });
+}
+
+// ===== MUA ITEM SHOP =====
+// Xử lý mua item: trừ xu, lưu state, áp dụng hiệu ứng
+function purchaseItem(item) {
+  if (state.coins < item.price) return; // double-check
+
+  state.coins -= item.price;
+  state.shopOwned.push(item.id);
+  saveState();
+  renderCoin();
+
+  // Áp dụng hiệu ứng thực tế theo item
+  if (item.id === "shop_1") {
+    activateCustomTimer(); // mở khoá custom timer panel
+  }
+
+  renderShop(); // render lại để cập nhật trạng thái
+}
+
+// ===== MỞ KHOÁ CUSTOM TIMER =====
+// Khi mua shop_1: hiện nút Custom trong timer, nếu đang ẩn
+function activateCustomTimer() {
+  const customBtn = document.getElementById("customBtn");
+  if (customBtn) {
+    // Xoá trạng thái khoá (nếu có) và đảm bảo hiển thị
+    customBtn.classList.remove("locked-feature");
+    customBtn.removeAttribute("disabled");
+    customBtn.title = "";
+    // Hiệu ứng nhấp nháy nhẹ để báo mở khoá thành công
+    customBtn.style.transition = "all 0.3s ease";
+    customBtn.style.borderColor = "#f5c842";
+    customBtn.style.color = "#f5c842";
+    setTimeout(() => {
+      customBtn.style.borderColor = "";
+      customBtn.style.color = "";
+    }, 1500);
+  }
 }
 
 
@@ -365,6 +432,27 @@ tickClock();
 // ===== LẮNG NGHE EVENT TỪ main.js =====
 // main.js bắn "focusSessionDone" mỗi khi 1 focus session kết thúc
 window.addEventListener("focusSessionDone", e => handleFocusSessionDone(e.detail));
+
+
+// ===== KHỞI TẠO CUSTOM TIMER =====
+// Nếu shop_1 chưa được mua: khoá nút Custom trong timer
+// Nếu đã mua rồi: kích hoạt bình thường
+(function initCustomTimerState() {
+  const customBtn = document.getElementById("customBtn");
+  if (!customBtn) return;
+
+  if (state.shopOwned.includes("shop_1")) {
+    // Đã sở hữu: đảm bảo hoạt động bình thường
+    customBtn.classList.remove("locked-feature");
+    customBtn.removeAttribute("disabled");
+    customBtn.title = "";
+  } else {
+    // Chưa mua: thêm class khoá, tooltip gợi ý mua ở Shop
+    customBtn.classList.add("locked-feature");
+    customBtn.disabled = true;
+    customBtn.title = "Mua ở Shop để mở khoá (50 xu)";
+  }
+})();
 
 
 // ===== KHỞI TẠO =====
