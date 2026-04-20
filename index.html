@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="tasks.css">
   <!-- CSS calendar + journal -->
   <link rel="stylesheet" href="journal.css">
+  <!-- CSS music player -->
+  <link rel="stylesheet" href="music.css">
   <!-- Font chữ: DM Mono (số/code), Syne (tiêu đề) -->
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 </head>
@@ -300,5 +302,123 @@
 
   <!-- JS journal load cuối cùng -->
   <script src="journal.js"></script>
+
+
+  <!-- ============================================================
+       MUSIC PLAYER — khung chữ nhật bo góc, giữa-trên màn hình
+       Hàng trên: sóng âm + tên bài (marquee)
+       Hàng dưới: play/pause | white noise btn | volume icon+popup
+  ============================================================ -->
+  <div id="musicWidget">
+
+    <!-- Dòng trên: sóng âm + tên bài -->
+    <div id="musicTopRow">
+      <div id="musicPlayingDots">
+        <div class="music-dot"></div>
+        <div class="music-dot"></div>
+        <div class="music-dot"></div>
+      </div>
+      <div id="musicTitleWrapper">
+        <span id="musicTitle">—</span>
+      </div>
+    </div>
+
+    <!-- Dòng dưới: sound (trái) | play (giữa) | volume (phải) -->
+    <div id="musicControls">
+
+      <!-- TRÁI: Nút White Noise -->
+      <button id="whiteNoiseBtn" title="White Noise">
+        <!-- ICON WHITE NOISE — thay emoji bằng SVG/img tuỳ ý -->
+        🌿
+      </button>
+
+      <!-- GIỮA: Nút play / pause nhạc -->
+      <button id="musicPlayBtn" title="Play / Pause">
+        <svg id="musicPlayIcon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      </button>
+
+      <!-- PHẢI: Volume icon + popup dọc xuống -->
+      <div id="musicVolumeWrap">
+        <span id="musicVolumeIcon" title="Mute / Unmute">🔉</span>
+        <div id="musicVolumePopup">
+          <span id="musicVolumeValue">70%</span>
+          <input
+            type="range"
+            id="musicVolumeSlider"
+            min="0" max="1" step="0.02"
+            value="0.7"
+            orient="vertical"
+            title="Âm lượng"
+          >
+        </div>
+      </div>
+
+    </div>
+
+    <!-- White Noise Panel — hiện khi click nút white noise -->
+    <div id="whiteNoisePanel" class="wn-hidden">
+
+      <!-- ======================================================
+           WHITE NOISE OPTIONS — 5 lựa chọn
+           Để thêm/đổi: sửa mỗi .wn-option bên dưới
+           - data-src   : đường dẫn file âm thanh, vd "sounds/rain.mp3"
+           - data-label : tên hiển thị dưới icon
+           - Emoji/icon : thay nội dung bên trong .wn-icon
+           Ví dụ thêm file: bỏ file vào thư mục sounds/ rồi sửa data-src
+      ====================================================== -->
+
+      <!-- Option 1 — Mưa -->
+      <button class="wn-option" data-src="sounds/rain.mp3" data-label="Mưa">
+        <span class="wn-icon">
+          <!-- THAY ICON: emoji hoặc <img src="icons/rain.svg"> -->
+          🌧
+        </span>
+        <span class="wn-label">Mưa</span>
+      </button>
+
+      <!-- Option 2 — Rừng -->
+      <button class="wn-option" data-src="sounds/forest.mp3" data-label="Rừng">
+        <span class="wn-icon">
+          <!-- THAY ICON -->
+          🌲
+        </span>
+        <span class="wn-label">Rừng</span>
+      </button>
+
+      <!-- Option 3 — Biển -->
+      <button class="wn-option" data-src="sounds/ocean.mp3" data-label="Biển">
+        <span class="wn-icon">
+          <!-- THAY ICON -->
+          🌊
+        </span>
+        <span class="wn-label">Biển</span>
+      </button>
+
+      <!-- Option 4 — Lửa -->
+      <button class="wn-option" data-src="sounds/fire.mp3" data-label="Lửa">
+        <span class="wn-icon">
+          <!-- THAY ICON -->
+          🔥
+        </span>
+        <span class="wn-label">Lửa</span>
+      </button>
+
+      <!-- Option 5 — Cafe -->
+      <button class="wn-option" data-src="sounds/cafe.mp3" data-label="Café">
+        <span class="wn-icon">
+          <!-- THAY ICON -->
+          ☕
+        </span>
+        <span class="wn-label">Café</span>
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- JS music player load cuối cùng -->
+  <script src="music.js"></script>
 </body>
 </html>

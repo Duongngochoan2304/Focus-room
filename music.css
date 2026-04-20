@@ -1,0 +1,368 @@
+/* ============================================================
+   music.css — Music Player + White Noise Widget
+============================================================ */
+
+
+/* ===== WIDGET CONTAINER ===== */
+#musicWidget {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 18px 13px;
+  width: 220px;
+
+  background: rgba(20, 12, 8, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07);
+}
+
+
+/* ===== DÒNG TRÊN: SÓNG ÂM + TÊN BÀI ===== */
+#musicTopRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+/* Sóng âm 3 chấm */
+#musicPlayingDots {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#musicWidget.playing #musicPlayingDots { opacity: 1; }
+
+.music-dot {
+  width: 2px;
+  border-radius: 1px;
+  background: #e05c42;
+  animation: barBounce 0.9s ease-in-out infinite;
+}
+
+.music-dot:nth-child(1) { height: 5px;  animation-delay: 0s; }
+.music-dot:nth-child(2) { height: 9px;  animation-delay: 0.15s; }
+.music-dot:nth-child(3) { height: 4px;  animation-delay: 0.3s; }
+
+@keyframes barBounce {
+  0%, 100% { transform: scaleY(0.4); opacity: 0.5; }
+  50%       { transform: scaleY(1);   opacity: 1; }
+}
+
+#musicWidget:not(.playing) .music-dot { animation-play-state: paused; }
+
+/* Tên bài — marquee khi hover nếu tên dài */
+#musicTitleWrapper {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  cursor: default;
+}
+
+#musicTitle {
+  display: inline-block;
+  white-space: nowrap;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: rgba(240, 230, 223, 0.6);
+}
+
+#musicTitleWrapper:hover #musicTitle.scrolling {
+  animation: marqueeScroll var(--marquee-duration, 4s) linear 0.4s 1 forwards;
+}
+
+@keyframes marqueeScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(var(--marquee-distance, -80px)); }
+}
+
+
+/* ===== DÒNG DƯỚI: CONTROLS ===== */
+/* space-between: sound (trái) | play (giữa) | volume (phải) */
+#musicControls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 4px;
+}
+
+/* Ẩn divider — không cần với space-between */
+.mc-divider { display: none; }
+
+/* Nút Play / Pause chính */
+#musicPlayBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(224, 92, 66, 0.5);
+  background: rgba(224, 92, 66, 0.16);
+  color: #e05c42;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+#musicPlayBtn:hover {
+  background: rgba(224, 92, 66, 0.3);
+  border-color: rgba(224, 92, 66, 0.8);
+  box-shadow: 0 0 12px rgba(224, 92, 66, 0.22);
+  transform: scale(1.07);
+}
+
+#musicPlayBtn:active { transform: scale(0.93); }
+
+#musicPlayBtn svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+}
+
+
+/* ===== NÚT WHITE NOISE ===== */
+#whiteNoiseBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: none;
+  color: rgba(240, 230, 223, 0.45);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  padding: 0;
+  position: relative; /* cho dot báo hiệu */
+}
+
+#whiteNoiseBtn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(240, 230, 223, 0.9);
+}
+
+/* Trạng thái panel đang mở */
+#whiteNoiseBtn.wn-btn-active {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* Dot cam nhỏ báo white noise đang bật */
+#whiteNoiseBtn.wn-noise-on::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #e05c42;
+  box-shadow: 0 0 4px rgba(224, 92, 66, 0.7);
+}
+
+
+/* ===== VOLUME WRAP + POPUP ===== */
+#musicVolumeWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Icon loa — luôn hiện */
+#musicVolumeIcon {
+  font-size: 15px;
+  cursor: pointer;
+  user-select: none;
+  color: rgba(240, 230, 223, 0.4);
+  transition: color 0.2s;
+  padding: 4px;
+  line-height: 1;
+  display: block;
+}
+
+#musicVolumeIcon:hover { color: rgba(240, 230, 223, 0.85); }
+
+/* Popup dọc — mở XUỐNG dưới từ icon volume */
+#musicVolumePopup {
+  position: absolute;
+  top: calc(100% + 8px);   /* xuống dưới icon */
+  right: 0;                 /* canh theo cạnh phải (icon volume ở góc phải) */
+  transform: scaleY(0.8);
+  transform-origin: top center;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+
+  background: rgba(18, 10, 6, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 8px 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+  width: 34px;
+  z-index: 200;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.22s cubic-bezier(0.34,1.4,0.64,1);
+}
+
+/* JS thêm class này để hiện popup */
+#musicVolumePopup.vol-visible {
+  opacity: 1;
+  pointer-events: all;
+  transform: scaleY(1);
+}
+
+/* Số % volume */
+#musicVolumeValue {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: rgba(240, 230, 223, 0.4);
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+/* Slider dọc */
+#musicVolumeSlider {
+  -webkit-appearance: slider-vertical;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  appearance: slider-vertical;
+  width: 4px;
+  height: 52px;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.1);
+  accent-color: #e05c42;
+}
+
+#musicVolumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #e05c42;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 6px rgba(224, 92, 66, 0.5);
+  transition: transform 0.15s;
+}
+
+#musicVolumeSlider::-webkit-slider-thumb:hover { transform: scale(1.3); }
+
+#musicVolumeSlider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #e05c42;
+  border: none;
+  cursor: pointer;
+}
+
+
+/* ===== WHITE NOISE PANEL ===== */
+/* Panel 5 options, nằm dưới controls trong widget */
+#whiteNoisePanel {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+
+  /* Animation mở xuống */
+  max-height: 80px;
+  opacity: 1;
+  overflow: hidden;
+  transition: max-height 0.28s ease, opacity 0.22s ease;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Ẩn panel */
+#whiteNoisePanel.wn-hidden {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0;
+  border-top-color: transparent;
+}
+
+/* Mỗi option white noise: icon + label */
+.wn-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 5px 2px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.wn-option:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Option đang phát — viền cam, nền nhạt */
+.wn-option.wn-active {
+  background: rgba(224, 92, 66, 0.14);
+  border-color: rgba(224, 92, 66, 0.45);
+}
+
+/* Icon (emoji hoặc img) */
+.wn-icon {
+  font-size: 16px;
+  line-height: 1;
+  display: block;
+}
+
+/* ======================================================
+   Nếu dùng <img> làm icon: thêm vào .wn-icon img
+   .wn-icon img { width: 18px; height: 18px; }
+====================================================== */
+
+/* Label tên âm thanh */
+.wn-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  color: rgba(240, 230, 223, 0.4);
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.wn-option.wn-active .wn-label {
+  color: rgba(224, 92, 66, 0.85);
+}
