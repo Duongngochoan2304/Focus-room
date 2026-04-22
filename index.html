@@ -10,12 +10,77 @@
   <link rel="stylesheet" href="tasks.css">
   <!-- CSS calendar + journal -->
   <link rel="stylesheet" href="journal.css">
+  <!-- CSS background effects -->
+  <link rel="stylesheet" href="bg.css">
+  <!-- CSS 3D room background -->
+  <link rel="stylesheet" href="room.css">
   <!-- CSS music player -->
   <link rel="stylesheet" href="music.css">
   <!-- Font chữ: DM Mono (số/code), Syne (tiêu đề) -->
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+
+  <!-- Canvas Three.js — phòng 3D nền toàn màn hình -->
+  <canvas id="roomCanvas"></canvas>
+  <!-- Lớp vignette mờ viền cho UI dễ đọc hơn -->
+  <div id="roomVignette"></div>
+
+  <!-- Canvas background effects (dưới room canvas) -->
+  <canvas id="bgCanvas"></canvas>
+
+  <!-- BG Switcher — toggle + panel dọc + color picker riêng -->
+  <div id="bgSwitcher">
+    <!-- Nút toggle chính -->
+    <button id="bgToggleBtn" title="Đổi nền">✦</button>
+    <!-- Panel các nút hiệu ứng, slide ra bên phải -->
+    <div id="bgOptionPanel">
+      <button class="bg-option" data-effect="space">
+        <span class="bg-icon">🌌</span>
+        <span class="bg-label">Vũ trụ</span>
+      </button>
+      <button class="bg-option" data-effect="rain">
+        <span class="bg-icon">🌧</span>
+        <span class="bg-label">Mưa</span>
+      </button>
+      <button class="bg-option" data-effect="snow">
+        <span class="bg-icon">❄️</span>
+        <span class="bg-label">Tuyết</span>
+      </button>
+      <button class="bg-option" data-effect="ocean">
+        <span class="bg-icon">🌊</span>
+        <span class="bg-label">Đại dương</span>
+      </button>
+      <button class="bg-option" data-effect="custom">
+        <span class="bg-icon">🎨</span>
+        <span class="bg-label">Màu sắc</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Color picker — fixed, luôn nằm trong màn hình -->
+  <div id="colorPickerPanel">
+    <div class="cp-header">
+      <span class="cp-title">Tuỳ chỉnh nền</span>
+      <button id="cpResetBtn">Reset</button>
+    </div>
+    <div id="cpPreview"></div>
+    <div class="cp-row">
+      <span class="cp-label">Màu sắc</span>
+      <input type="range" id="cpHue" min="0" max="360" value="250">
+      <span class="cp-val" id="cpHueVal">250°</span>
+    </div>
+    <div class="cp-row">
+      <span class="cp-label">Bão hoà</span>
+      <input type="range" id="cpSat" min="0" max="100" value="35">
+      <span class="cp-val" id="cpSatVal">35%</span>
+    </div>
+    <div class="cp-row">
+      <span class="cp-label">Độ sáng</span>
+      <input type="range" id="cpLit" min="0" max="40" value="7">
+      <span class="cp-val" id="cpLitVal">7%</span>
+    </div>
+  </div>
 
   <!-- Lớp nhiễu texture nền, trang trí -->
   <div class="noise"></div>
@@ -349,7 +414,7 @@
             id="musicVolumeSlider"
             min="0" max="1" step="0.02"
             value="0.7"
-            orient="vertical"
+            style="writing-mode: vertical-lr; direction: rtl;"
             title="Âm lượng"
           >
         </div>
@@ -420,5 +485,19 @@
 
   <!-- JS music player load cuối cùng -->
   <script src="music.js"></script>
+
+  <!-- Background effects -->
+  <script type="module" src="bg.js"></script>
+
+  <!-- Three.js via import map + ES module (cách duy nhất load GLTFLoader đúng) -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="room.js"></script>
 </body>
 </html>

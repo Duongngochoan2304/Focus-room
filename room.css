@@ -1,0 +1,27 @@
+/* ============================================================
+   room.css — Canvas 3D phòng nền toàn màn hình
+============================================================ */
+
+#roomCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  display: block;
+  /* pointer-events: auto — JS xử lý drag/scroll trên canvas */
+  /* Các widget UI (z-index 100+) nằm trên, vẫn nhận click bình thường */
+}
+
+#roomVignette {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 35%,
+    rgba(10, 5, 2, 0.45) 100%
+  );
+}

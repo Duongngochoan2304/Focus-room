@@ -1,0 +1,287 @@
+/* ============================================================
+   bg.css — Background Effects Switcher (panel dọc bên phải)
+============================================================ */
+
+#bgCanvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: -1;
+  display: block;
+  pointer-events: none;
+}
+
+/* ===== WRAPPER toàn bộ UI ===== */
+#bgSwitcher {
+  position: fixed;
+  bottom: 28px;
+  left: 28px;
+  z-index: 110;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+/* ===== NÚT TOGGLE TRUNG TÂM ===== */
+#bgToggleBtn {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(20,12,8,0.88);
+  color: rgba(240,230,223,0.55);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07);
+  transition: all 0.22s ease;
+  position: relative;
+  z-index: 2;
+}
+
+#bgToggleBtn:hover {
+  background: rgba(224,92,66,0.2);
+  border-color: rgba(224,92,66,0.45);
+  color: #f0e6df;
+  transform: rotate(90deg) scale(1.08);
+}
+
+#bgToggleBtn.active {
+  background: rgba(224,92,66,0.22);
+  border-color: rgba(224,92,66,0.55);
+  color: #f0e6df;
+  transform: rotate(90deg);
+}
+
+/* ===== PANEL CHỨA CÁC NÚT — hiện bên phải ===== */
+#bgOptionPanel {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 8px;
+
+  /* Ẩn mặc định */
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-12px);
+  transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+#bgOptionPanel.open {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateX(0);
+}
+
+/* ===== NÚT HIỆU ỨNG ===== */
+/* Mỗi nút là cột: icon tròn + ánh sáng dưới + label */
+.bg-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.18s ease;
+}
+
+.bg-option:nth-child(1) { transition-delay: 0.00s; }
+.bg-option:nth-child(2) { transition-delay: 0.03s; }
+.bg-option:nth-child(3) { transition-delay: 0.06s; }
+.bg-option:nth-child(4) { transition-delay: 0.09s; }
+.bg-option:nth-child(5) { transition-delay: 0.12s; }
+
+.bg-option:hover { transform: translateY(-4px); }
+
+/* Icon tròn */
+.bg-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(18,10,6,0.9);
+  color: rgba(240,230,223,0.75);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  transition: all 0.18s ease;
+  position: relative;
+}
+
+.bg-option:hover .bg-icon {
+  border-color: rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.08);
+}
+
+/* Ánh sáng viền dưới icon khi active */
+.bg-option.active .bg-icon {
+  border-color: rgba(224,92,66,0.6);
+  background: rgba(224,92,66,0.18);
+  color: #f0e6df;
+  /* Ánh sáng glow phía dưới */
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.4),
+    0 6px 16px rgba(224,92,66,0.45),
+    inset 0 -2px 8px rgba(224,92,66,0.3);
+}
+
+/* Đường sáng nhỏ nằm dưới icon active */
+.bg-option.active .bg-icon::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 2px;
+  border-radius: 1px;
+  background: #e05c42;
+  box-shadow: 0 0 6px rgba(224,92,66,0.9);
+}
+
+/* Label nhỏ dưới icon */
+.bg-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  color: rgba(240,230,223,0.35);
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color 0.18s ease;
+}
+
+.bg-option.active .bg-label,
+.bg-option:hover .bg-label {
+  color: rgba(240,230,223,0.75);
+}
+
+
+/* ===== COLOR PICKER PANEL ===== */
+/* Fixed position — luôn nằm trong màn hình, trên toggle btn */
+#colorPickerPanel {
+  position: fixed;
+  bottom: 80px;   /* trên toggle btn */
+  left: 28px;     /* canh trái như switcher */
+  width: 230px;
+
+  background: rgba(14,7,3,0.97);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 14px 16px 12px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+  z-index: 115;
+
+  /* Ẩn mặc định */
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transform-origin: bottom left;
+  transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.34,1.4,0.64,1);
+}
+
+#colorPickerPanel.open {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+}
+
+/* Header picker */
+.cp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.cp-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(240,230,223,0.4);
+}
+
+/* Nút reset về default */
+#cpResetBtn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(240,230,223,0.35);
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  transition: all 0.18s;
+}
+
+#cpResetBtn:hover {
+  border-color: rgba(224,92,66,0.4);
+  color: rgba(224,92,66,0.8);
+  background: rgba(224,92,66,0.08);
+}
+
+/* Preview ô màu */
+#cpPreview {
+  width: 100%;
+  height: 32px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: background 0.15s ease;
+}
+
+.cp-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.cp-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  color: rgba(240,230,223,0.38);
+  letter-spacing: 0.06em;
+  min-width: 55px;
+  flex-shrink: 0;
+}
+
+.cp-row input[type=range] {
+  -webkit-appearance: none;
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.12);
+  outline: none;
+  cursor: pointer;
+  accent-color: #e05c42;
+}
+
+.cp-row input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #e05c42;
+  cursor: pointer;
+}
+
+.cp-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  color: rgba(240,230,223,0.3);
+  min-width: 26px;
+  text-align: right;
+}
