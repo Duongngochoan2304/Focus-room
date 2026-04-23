@@ -7,7 +7,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // ===== PATH =====
-const GLB_PATH = './gk uet.glb';
+const GLB_PATH = './gkuet.glb';
 
 // ===== RENDERER =====
 const canvas = document.querySelector('#roomCanvas');
