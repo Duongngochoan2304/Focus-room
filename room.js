@@ -50,7 +50,7 @@ const PHI_MAX    =  2;   // không xoay quá xuống dưới
 const THETA_MIN  = -0.3;   // giới hạn xoay trái
 const THETA_MAX  =  2;   // giới hạn xoay phải
 const RADIUS_MIN =  1;     // zoom in tối đa
-const RADIUS_MAX = 20;     // zoom out tối đa
+const RADIUS_MAX = 10;     // zoom out tối đa
 
 // Tốc độ
 const ROTATE_SPEED = 0.005; // radian / pixel kéo chuột
