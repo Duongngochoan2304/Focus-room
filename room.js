@@ -49,7 +49,7 @@ const PHI_MIN    = -0.3;   // không xoay quá lên trên
 const PHI_MAX    =  1;   // không xoay quá xuống dưới
 const THETA_MIN  = -0.3;   // giới hạn xoay trái
 const THETA_MAX  =  1;   // giới hạn xoay phải
-const RADIUS_MIN =  2;     // zoom in tối đa
+const RADIUS_MIN =  1;     // zoom in tối đa
 const RADIUS_MAX = 20;     // zoom out tối đa
 
 // Tốc độ
