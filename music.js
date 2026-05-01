@@ -39,7 +39,7 @@ let activeNoiseBtn = null;   // nút white noise đang active (null = tắt)
 // ===== AUDIO ELEMENTS =====
 // Audio chính cho nhạc nền playlist
 const audio = new Audio();
-audio.loop   = true;          // loop toàn playlist: bài cuối → bài đầu
+audio.loop   = false;          // loop toàn playlist: bài cuối → bài đầu
 audio.volume = loadVolume();
 
 // Audio riêng cho white noise — loop liên tục
