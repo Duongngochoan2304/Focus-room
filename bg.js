@@ -431,3 +431,6 @@ document.querySelectorAll('.bg-option').forEach(btn => {
 const savedBg = localStorage.getItem('focusroom_bg') || 'none';
 setEffect(savedBg);
 console.log('bg.js started | effect:', savedBg);
+document.querySelectorAll('.bg-option').forEach(btn => {
+  btn.classList.toggle('active', btn.dataset.effect === savedBg);
+});
