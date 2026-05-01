@@ -7,19 +7,20 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // ===== PATH =====
-const GLB_PATH = './gkuet.glb';
+const GLB_PATH = './gk_uet.gltf';
 
 // ===== RENDERER =====
 const canvas = document.querySelector('#roomCanvas');
 const renderer = new THREE.WebGLRenderer({ antialias: true, canvas, alpha: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight, true);
+renderer.setClearColor(0x000000, 0); // alpha=0: trong suốt hoàn toàn → gradient CSS hiện qua
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.3;
 
 // ===== SCENE =====
 const scene = new THREE.Scene();
-// scene.background = transparent — bg effects từ bgCanvas hiện qua
+// scene.background = null — transparent, body gradient shows through
 
 // ===== CAMERA =====
 const camera = new THREE.PerspectiveCamera(
@@ -31,8 +32,8 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.set(6.35, 2.45, 30);
 
 // ===== ÁNH SÁNG =====
-scene.add(new THREE.AmbientLight(0xfff5e0, 2.0));
-const dir = new THREE.DirectionalLight(0xfff0d0, 2.5);
+scene.add(new THREE.AmbientLight(0xffffff, 4.0)); // sáng hơn để thấy model
+const dir = new THREE.DirectionalLight(0xffffff, 3.5);
 dir.position.set(6, 8, 10);
 scene.add(dir);
 scene.add(new THREE.HemisphereLight(0xffe8c0, 0x3a1508, 1.0));
@@ -45,12 +46,12 @@ let theta   = 0;      // góc ngang (azimuth), radian
 let phi     = 0.1;    // góc dọc (polar), radian — 0=nhìn thẳng
 
 // Giới hạn xoay và zoom
-const PHI_MIN    = -1;   // không xoay quá lên trên
-const PHI_MAX    =  2;   // không xoay quá xuống dưới
-const THETA_MIN  = -1;   // giới hạn xoay trái
-const THETA_MAX  =  2;   // giới hạn xoay phải
-const RADIUS_MIN =  1;     // zoom in tối đa
-const RADIUS_MAX = 10;     // zoom out tối đa
+const PHI_MIN    = -0.5;   // không xoay quá lên trên
+const PHI_MAX    =  0.5;   // không xoay quá xuống dưới
+const THETA_MIN  = -0.6;   // giới hạn xoay trái
+const THETA_MAX  =  0.6;   // giới hạn xoay phải
+const RADIUS_MIN =  4;     // zoom in tối đa
+const RADIUS_MAX = 35;     // zoom out tối đa
 
 // Tốc độ
 const ROTATE_SPEED = 0.005; // radian / pixel kéo chuột

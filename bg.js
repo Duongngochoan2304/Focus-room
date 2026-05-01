@@ -1,17 +1,16 @@
 // ============================================================
-// bg.js — Background Effects + Custom Color
+// bg.js — Background Effects
 // ============================================================
 
 import * as THREE from 'three';
 
-// ===== RENDERER =====
 const canvas   = document.querySelector('#bgCanvas');
-const renderer = new THREE.WebGLRenderer({ canvas, alpha: false, antialias: false });
+const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.setSize(window.innerWidth, window.innerHeight, true);
+renderer.setClearColor(0x000000, 0);
 
 const scene  = new THREE.Scene();
-scene.background = new THREE.Color(0x1a0f0a);
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
 let currentEffect = 'none';
@@ -20,29 +19,32 @@ let clock         = new THREE.Clock();
 
 function addObj(obj) { scene.add(obj); sceneObjects.push(obj); return obj; }
 
-// ===== EFFECTS =====
 const EFFECTS = {
 
-  // ── NONE ────────────────────────────────────────────────
   none: {
     label: 'Mặc định', icon: '◯',
-    init() { scene.background = new THREE.Color(0x1a0f0a); },
+    init() {
+      scene.background = null;
+      document.body.style.background = 'radial-gradient(ellipse at center, #fedcfd 0%, #8b4fc0 50%, #4f39a8 100%)';
+      document.body.style.backgroundAttachment = 'fixed';
+    },
     update() {},
   },
 
-  // ── VŨ TRỤ ──────────────────────────────────────────────
+// ── VŨ TRỤ ──────────────────────────────────────────────
   space: {
     label: 'Vũ trụ', icon: '🌌',
     init() {
-      scene.background = new THREE.Color(0x00000f);
+      scene.background = new THREE.Color(0x0d0018);
+      document.body.style.background = '';
       const N1 = 1500, g1 = new THREE.BufferGeometry();
       const p1 = new Float32Array(N1*3), c1 = new Float32Array(N1*3), s1 = new Float32Array(N1);
       for (let i = 0; i < N1; i++) {
         p1[i*3]=(Math.random()-.5)*2.2; p1[i*3+1]=(Math.random()-.5)*2.2; p1[i*3+2]=0;
         const r=Math.random();
-        if(r<.55){c1[i*3]=1;c1[i*3+1]=1;c1[i*3+2]=1;}
-        else if(r<.78){c1[i*3]=.6;c1[i*3+1]=.8;c1[i*3+2]=1;}
-        else{c1[i*3]=.85;c1[i*3+1]=.6;c1[i*3+2]=1;}
+        if(r<.45){c1[i*3]=1;c1[i*3+1]=.92;c1[i*3+2]=.98;}     // trắng hồng
+        else if(r<.72){c1[i*3]=.85;c1[i*3+1]=.6;c1[i*3+2]=1;}   // tím
+        else{c1[i*3]=1;c1[i*3+1]=.55;c1[i*3+2]=.8;}             // hồng
         s1[i]=Math.pow(Math.random(),2.5)*5+.8;
       }
       g1.setAttribute('position',new THREE.BufferAttribute(p1,3));
@@ -130,6 +132,25 @@ const EFFECTS = {
             gl_FragColor=vec4(vColor,min(alpha,1.));
           }`});
       const s3o=addObj(new THREE.Points(g3,m3));s3o.userData={mat:m3,phase:ph3};
+
+      // Lớp 4: sao băng — sinh ra định kỳ, bay qua màn hình
+      // Dùng LineSegments, mỗi sao băng là 1 vạch sáng dài
+      const MAX_SHOOT = 6;
+      const shootPos  = new Float32Array(MAX_SHOOT * 6); // 2 điểm × 3
+      const shootData = []; // {active, x, y, vx, vy, life, maxLife, len}
+      for(let i=0;i<MAX_SHOOT;i++){
+        shootData.push({active:false,x:0,y:0,vx:0,vy:0,life:0,maxLife:1,len:.12});
+        shootPos[i*6]=shootPos[i*6+3]=shootPos[i*6+1]=shootPos[i*6+4]=10; // ngoài màn
+      }
+      const shootGeo = new THREE.BufferGeometry();
+      shootGeo.setAttribute('position',new THREE.BufferAttribute(shootPos,3));
+      const shootMat = new THREE.ShaderMaterial({
+        transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+        vertexShader:`void main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+        fragmentShader:`void main(){gl_FragColor=vec4(1.,0.95,1.,0.9);}`
+      });
+      const shootObj = addObj(new THREE.LineSegments(shootGeo,shootMat));
+      shootObj.userData = {shootPos,shootData,MAX_SHOOT,nextShoot:4+Math.random()*6};
     },
     update(t){
       sceneObjects.forEach(o=>{
@@ -143,46 +164,128 @@ const EFFECTS = {
             o.geometry.attributes.position.needsUpdate=true;
           }
         }
+        // Sao băng update
+        if(o.userData.shootData){
+          const {shootPos,shootData,MAX_SHOOT} = o.userData;
+          o.userData.nextShoot -= 0.016;
+          // Spawn sao băng mới
+          if(o.userData.nextShoot <= 0){
+            const idx = shootData.findIndex(s=>!s.active);
+            if(idx>=0){
+              const s=shootData[idx];
+              s.active=true; s.life=0; s.maxLife=0.6+Math.random()*0.5;
+              s.len=0.1+Math.random()*0.15;
+              // Spawn từ trên-phải, bay sang dưới-trái
+              s.x=0.2+Math.random()*0.9; s.y=0.3+Math.random()*0.7;
+              const angle=Math.PI*(0.55+Math.random()*0.2); // ~200-215°
+              const spd=0.018+Math.random()*0.015;
+              s.vx=Math.cos(angle)*spd; s.vy=Math.sin(angle)*spd;
+            }
+            o.userData.nextShoot = 3+Math.random()*8;
+          }
+          // Update từng sao băng
+          for(let i=0;i<MAX_SHOOT;i++){
+            const s=shootData[i];
+            if(!s.active){shootPos[i*6]=shootPos[i*6+3]=10;continue;}
+            s.x+=s.vx; s.y+=s.vy; s.life+=0.016;
+            const fade=1-s.life/s.maxLife;
+            // Đầu sao băng
+            shootPos[i*6]  =s.x;      shootPos[i*6+1]=s.y;      shootPos[i*6+2]=0;
+            // Đuôi sao băng (ngược hướng bay)
+            shootPos[i*6+3]=s.x-s.vx/0.016*s.len; shootPos[i*6+4]=s.y-s.vy/0.016*s.len; shootPos[i*6+5]=0;
+            if(s.life>=s.maxLife||s.x<-1.3||s.y<-1.3) s.active=false;
+          }
+          o.geometry.attributes.position.needsUpdate=true;
+        }
       });
     },
   },
 
-  // ── MƯA ─────────────────────────────────────────────────
+// ── MƯA — gió thay đổi góc, đan xen hạt ngắn/dài ──────
   rain: {
     label: 'Mưa', icon: '🌧',
     init() {
       scene.background = new THREE.Color(0x05080f);
-      const COUNT=600,positions=new Float32Array(COUNT*6),vel=new Float32Array(COUNT),lenArr=new Float32Array(COUNT);
-      const reset=(i)=>{
-        const x=(Math.random()-.5)*2.6,y=1.2+Math.random()*.5,len=.03+Math.random()*.06,sl=.008;
-        lenArr[i]=len;positions[i*6]=x;positions[i*6+1]=y;positions[i*6+2]=0;
-        positions[i*6+3]=x-sl;positions[i*6+4]=y-len;positions[i*6+5]=0;
-        vel[i]=.012+Math.random()*.018;
+      document.body.style.background = '';
+      const COUNT = 700;
+      const positions = new Float32Array(COUNT * 6); // 2 điểm × 3 xyz
+      const vel       = new Float32Array(COUNT);     // tốc độ rơi
+      const lenArr    = new Float32Array(COUNT);     // chiều dài giọt
+      const isLong    = new Uint8Array(COUNT);       // 1=dài, 0=ngắn
+
+      // windX: góc gió thay đổi theo thời gian
+      let windX = -0.006; // bắt đầu nghiêng trái
+
+      const reset = (i, fromTop) => {
+        const x = (Math.random() - 0.5) * 2.8;
+        const y = fromTop ? 1.3 + Math.random() * 0.4 : (Math.random() - 0.5) * 2.4;
+        // Đan xen: 60% ngắn, 40% dài
+        const long    = Math.random() > 0.6;
+        isLong[i]     = long ? 1 : 0;
+        const len     = long ? (0.06 + Math.random() * 0.08) : (0.015 + Math.random() * 0.025);
+        lenArr[i]     = len;
+        vel[i]        = long ? (0.014 + Math.random() * 0.012) : (0.010 + Math.random() * 0.010);
+
+        // Điểm trên của giọt
+        positions[i*6]   = x;
+        positions[i*6+1] = y;
+        positions[i*6+2] = 0;
+        // Điểm dưới: nghiêng theo windX hiện tại
+        positions[i*6+3] = x + windX * len * 12;
+        positions[i*6+4] = y - len;
+        positions[i*6+5] = 0;
       };
-      for(let i=0;i<COUNT;i++){reset(i);positions[i*6+1]=(Math.random()-.5)*2.2;positions[i*6+4]=positions[i*6+1]-lenArr[i];}
-      const geo=new THREE.BufferGeometry();
-      geo.setAttribute('position',new THREE.BufferAttribute(positions,3));
-      const mat=new THREE.LineBasicMaterial({color:new THREE.Color(.85,.93,1),transparent:true,opacity:.8,depthWrite:false});
-      const lines=addObj(new THREE.LineSegments(geo,mat));
-      lines.userData={positions,vel,lenArr,COUNT,reset};
+
+      for (let i = 0; i < COUNT; i++) reset(i, false);
+
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+      const mat = new THREE.LineBasicMaterial({
+        color: new THREE.Color(0.85, 0.93, 1.0),
+        transparent: true, opacity: 0.75, depthWrite: false
+      });
+
+      const lines = addObj(new THREE.LineSegments(geo, mat));
+      lines.userData = { positions, vel, lenArr, isLong, COUNT, reset, windX: { val: windX } };
     },
-    update(){
-      const o=sceneObjects[0];if(!o)return;
-      const{positions,vel,lenArr,COUNT,reset}=o.userData;const sl=.008;
-      for(let i=0;i<COUNT;i++){
-        const dy=vel[i];positions[i*6+1]-=dy;positions[i*6+4]-=dy;
-        positions[i*6]-=sl*.3;positions[i*6+3]-=sl*.3;
-        if(positions[i*6+4]<-1.2)reset(i);
+    update(t) {
+      const o = sceneObjects[0]; if (!o) return;
+      const { positions, vel, lenArr, COUNT, reset, windX } = o.userData;
+
+      // Gió thay đổi chậm theo sin — lúc nghiêng trái, lúc nghiêng phải
+      windX.val = Math.sin(t * 0.18) * 0.012;
+
+      for (let i = 0; i < COUNT; i++) {
+        const dy  = vel[i];
+        const dx  = windX.val; // drift ngang theo gió
+
+        // Di chuyển cả 2 điểm
+        positions[i*6]   += dx;
+        positions[i*6+1] -= dy;
+        positions[i*6+3] += dx;
+        positions[i*6+4] -= dy;
+
+        // Cập nhật góc nghiêng của giọt theo gió hiện tại
+        const len = lenArr[i];
+        positions[i*6+3] = positions[i*6] + windX.val * len * 12;
+        positions[i*6+4] = positions[i*6+1] - len;
+
+        // Reset khi ra ngoài màn hình
+        if (positions[i*6+4] < -1.3 || positions[i*6] > 1.4 || positions[i*6] < -1.4) {
+          reset(i, true);
+        }
       }
-      o.geometry.attributes.position.needsUpdate=true;
+      o.geometry.attributes.position.needsUpdate = true;
     },
   },
 
-  // ── TUYẾT — bông tuyết xoay khi rơi ─────────────────────
+// ── TUYẾT — bông tuyết xoay khi rơi ─────────────────────
   snow: {
     label: 'Tuyết', icon: '❄️',
     init() {
       scene.background = new THREE.Color(0x08101a);
+      document.body.style.background = '';
       // Lớp 1: hạt tròn
       const N1=200,g1=new THREE.BufferGeometry();
       const p1=new Float32Array(N1*3),s1=new Float32Array(N1),ph1=new Float32Array(N1),v1=new Float32Array(N1);
@@ -263,198 +366,18 @@ const EFFECTS = {
       });
     },
   },
-
-  // ── ĐẠI DƯƠNG ────────────────────────────────────────────
-  ocean: {
-    label: 'Đại dương', icon: '🌊',
-    init() {
-      scene.background = new THREE.Color(0x021428);
-      const N1=300,g1=new THREE.BufferGeometry();
-      const p1=new Float32Array(N1*3),s1=new Float32Array(N1),ph1=new Float32Array(N1),v1=new Float32Array(N1);
-      for(let i=0;i<N1;i++){
-        p1[i*3]=(Math.random()-.5)*2.2;p1[i*3+1]=(Math.random()-.5)*2.2;p1[i*3+2]=0;
-        s1[i]=Math.random()*14+4;ph1[i]=Math.random()*Math.PI*2;v1[i]=.0015+Math.random()*.004;
-      }
-      g1.setAttribute('position',new THREE.BufferAttribute(p1,3));
-      g1.setAttribute('size',new THREE.BufferAttribute(s1,1));
-      const m1=new THREE.ShaderMaterial({transparent:true,depthWrite:false,
-        uniforms:{uTime:{value:0}},
-        vertexShader:`attribute float size;uniform float uTime;
-          void main(){float p=1.+.1*sin(uTime*2.+position.x*5.);gl_PointSize=size*p;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-        fragmentShader:`void main(){vec2 uv=gl_PointCoord-.5;float d=length(uv)*2.;
-          float rim=smoothstep(.65,.85,d)*(1.-smoothstep(.85,1.,d));
-          float inner=(1.-smoothstep(0.,.65,d))*.15;
-          float spec=exp(-length(uv-vec2(-.15,.15))*20.)*.8;
-          vec3 col=mix(vec3(.3,.7,1.),vec3(.8,.95,1.),spec+rim*.5);
-          gl_FragColor=vec4(col,rim*.85+inner+spec);}`});
-      const b=addObj(new THREE.Points(g1,m1));b.userData={mat:m1,pos:p1,phase:ph1,vel:v1,N:N1};
-
-      const N2=500,g2=new THREE.BufferGeometry();
-      const p2=new Float32Array(N2*3),s2=new Float32Array(N2),ph2=new Float32Array(N2),v2=new Float32Array(N2);
-      for(let i=0;i<N2;i++){
-        p2[i*3]=(Math.random()-.5)*2.2;p2[i*3+1]=(Math.random()-.5)*2.2;p2[i*3+2]=0;
-        s2[i]=Math.random()*3+1;ph2[i]=Math.random()*Math.PI*2;v2[i]=.0005+Math.random()*.002;
-      }
-      g2.setAttribute('position',new THREE.BufferAttribute(p2,3));
-      g2.setAttribute('size',new THREE.BufferAttribute(s2,1));
-      const m2=new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
-        uniforms:{uTime:{value:0}},
-        vertexShader:`attribute float size;uniform float uTime;
-          void main(){float t=.5+.5*sin(uTime*3.+position.x*8.+position.y*6.);gl_PointSize=size*t;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-        fragmentShader:`void main(){float d=length(gl_PointCoord-.5)*2.;float a=1.-smoothstep(.3,1.,d);gl_FragColor=vec4(.4,.8,1.,a*.7);}`});
-      const pl=addObj(new THREE.Points(g2,m2));pl.userData={mat:m2,pos:p2,phase:ph2,vel:v2,N:N2};
-    },
-    update(t){
-      sceneObjects.forEach(o=>{
-        if(!o.userData.pos)return;
-        const{mat,pos,phase,vel,N}=o.userData;
-        if(mat)mat.uniforms.uTime.value=t;
-        for(let i=0;i<N;i++){
-          pos[i*3+1]+=vel[i];pos[i*3]+=Math.sin(t*.4+phase[i])*.0007;
-          if(pos[i*3+1]>1.2){pos[i*3+1]=-1.2;pos[i*3]=(Math.random()-.5)*2.2;}
-        }
-        o.geometry.attributes.position.needsUpdate=true;
-      });
-    },
-  },
-
-  // ── CUSTOM COLOR — gradient + dust particles ────────────
-  custom: {
-    label: 'Tuỳ chỉnh', icon: '🎨',
-    init() {
-      const saved = JSON.parse(localStorage.getItem('focusroom_bg_custom') || '{"h":20,"s":44,"l":7}'); // hsl của #1a0f0a);
-      applyCustomColor(saved.h, saved.s, saved.l);
-      showColorPicker(saved);
-
-      // Thêm dust particles nhẹ để tạo chiều sâu
-      const N=180, geo=new THREE.BufferGeometry();
-      const pos=new Float32Array(N*3), spd=new Float32Array(N), ph=new Float32Array(N), sz=new Float32Array(N);
-      for(let i=0;i<N;i++){
-        pos[i*3]=(Math.random()-.5)*2.2; pos[i*3+1]=(Math.random()-.5)*2.2; pos[i*3+2]=0;
-        spd[i]=.0003+Math.random()*.001; ph[i]=Math.random()*Math.PI*2; sz[i]=Math.random()*3+.5;
-      }
-      geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
-      geo.setAttribute('size',new THREE.BufferAttribute(sz,1));
-      const mat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,
-        uniforms:{uTime:{value:0}},
-        vertexShader:`attribute float size;uniform float uTime;
-          void main(){float t=.4+.6*sin(uTime*.8+position.x*4.+position.y*3.);
-          gl_PointSize=size*t;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-        fragmentShader:`void main(){float d=length(gl_PointCoord-.5)*2.;
-          float a=1.-smoothstep(.3,1.,d);gl_FragColor=vec4(1.,1.,1.,a*.18);}`});
-      const dust=addObj(new THREE.Points(geo,mat));
-      dust.userData={mat,pos,spd,ph,N};
-    },
-    update(t){
-      if(sceneObjects.length===0)return;
-      const o=sceneObjects[0]; if(!o.userData.pos)return;
-      const{mat,pos,spd,ph,N}=o.userData;
-      mat.uniforms.uTime.value=t;
-      for(let i=0;i<N;i++){
-        pos[i*3+1]+=spd[i];
-        pos[i*3]+=Math.sin(t*.3+ph[i])*.0004;
-        if(pos[i*3+1]>1.15){pos[i*3+1]=-1.15;pos[i*3]=(Math.random()-.5)*2.2;}
-      }
-      o.geometry.attributes.position.needsUpdate=true;
-    },
-    cleanup() { hideColorPicker(); },
-  },
 };
 
-// ===== CUSTOM COLOR PICKER =====
-function hslToHex(h, s, l) {
-  const c = new THREE.Color();
-  c.setHSL(h/360, s/100, l/100);
-  return c;
-}
-
-// Mesh quad gradient: màu chính ở trung tâm, tối hơn ở viền
-let gradientMesh = null;
-
-function applyCustomColor(h, s, l) {
-  // Màu nền chính (tối)
-  const base = new THREE.Color().setHSL(h/360, (s/100)*0.6, Math.max((l/100)*0.5, 0.02));
-  scene.background = base;
-
-  // Tạo/cập nhật gradient vignette quad
-  if (gradientMesh) { scene.remove(gradientMesh); gradientMesh.geometry.dispose(); gradientMesh.material.dispose(); }
-
-  const c1 = new THREE.Color().setHSL(h/360, s/100, l/100);          // tâm sáng hơn
-  const c2 = new THREE.Color().setHSL((h+30)/360, s/100*0.7, l/100*0.3); // viền hơi lệch màu
-  const geo = new THREE.PlaneGeometry(2, 2);
-  const mat = new THREE.ShaderMaterial({
-    transparent: true, depthWrite: false,
-    uniforms: { uC1: {value: c1}, uC2: {value: c2} },
-    vertexShader: `varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}`,
-    fragmentShader: `uniform vec3 uC1;uniform vec3 uC2;varying vec2 vUv;
-      void main(){
-        vec2 uv=vUv*2.-1.;
-        float d=length(uv);
-        // Gradient tâm → viền
-        float t=smoothstep(0.,.85,d);
-        vec3 col=mix(uC1,uC2,t);
-        // Vignette thêm
-        float vig=1.-smoothstep(.4,1.2,d)*.5;
-        gl_FragColor=vec4(col*vig,1.);
-      }`
-  });
-  gradientMesh = new THREE.Mesh(geo, mat);
-  gradientMesh.renderOrder = -1;
-  scene.add(gradientMesh);
-}
-
-function showColorPicker(vals) {
-  const panel = document.getElementById('colorPickerPanel');
-  panel.classList.add('open');
-  document.getElementById('cpHue').value = vals.h;
-  document.getElementById('cpSat').value = vals.s;
-  document.getElementById('cpLit').value = vals.l;
-  document.getElementById('cpHueVal').textContent = vals.h + '°';
-  document.getElementById('cpSatVal').textContent = vals.s + '%';
-  document.getElementById('cpLitVal').textContent = vals.l + '%';
-  updatePickerPreview(vals.h, vals.s, vals.l);
-}
-
-function hideColorPicker() {
-  const panel = document.getElementById('colorPickerPanel');
-  if (panel) panel.classList.remove('open');
-}
-
-function updatePickerPreview(h, s, l) {
-  document.getElementById('cpPreview').style.background = `hsl(${h},${s}%,${l}%)`;
-}
-
-// Gán event color picker
-['cpHue','cpSat','cpLit'].forEach(id => {
-  const el  = document.getElementById(id);
-  const val = document.getElementById(id+'Val');
-  el.addEventListener('input', () => {
-    const h = +document.getElementById('cpHue').value;
-    const s = +document.getElementById('cpSat').value;
-    const l = +document.getElementById('cpLit').value;
-    val.textContent = el.value + (id === 'cpHue' ? '°' : '%');
-    applyCustomColor(h, s, l);
-    updatePickerPreview(h, s, l);
-    localStorage.setItem('focusroom_bg_custom', JSON.stringify({h,s,l}));
-  });
-});
-
-// ===== SWITCH =====
 function clearScene() {
-  if (EFFECTS[currentEffect]?.cleanup) EFFECTS[currentEffect].cleanup();
+  if (EFFECTS[currentEffect] && EFFECTS[currentEffect].cleanup) {
+    EFFECTS[currentEffect].cleanup();
+  }
   sceneObjects.forEach(o => {
     scene.remove(o);
-    if(o.geometry)o.geometry.dispose();
-    if(o.material)o.material.dispose();
+    if (o.geometry) o.geometry.dispose();
+    if (o.material) o.material.dispose();
   });
   sceneObjects = [];
-  // Xoá gradient mesh nếu tồn tại
-  if (gradientMesh) {
-    scene.remove(gradientMesh);
-    gradientMesh.geometry.dispose();
-    gradientMesh.material.dispose();
-    gradientMesh = null;
-  }
 }
 
 function setEffect(name) {
@@ -468,7 +391,6 @@ function setEffect(name) {
   localStorage.setItem('focusroom_bg', name);
 }
 
-// ===== RENDER LOOP =====
 function animate() {
   requestAnimationFrame(animate);
   const t = clock.getElapsedTime();
@@ -480,57 +402,32 @@ animate();
 window.addEventListener('resize', () => renderer.setSize(window.innerWidth, window.innerHeight, true));
 
 // ===== UI =====
-const toggleBtn     = document.getElementById('bgToggleBtn');
-const switcher      = document.getElementById('bgSwitcher');
-const optionPanel   = document.getElementById('bgOptionPanel');
-const colorPanel    = document.getElementById('colorPickerPanel');
-
-function closePanels() {
-  optionPanel.classList.remove('open');
-  toggleBtn.classList.remove('active');
-  hideColorPicker();
-}
+const toggleBtn   = document.getElementById('bgToggleBtn');
+const switcher    = document.getElementById('bgSwitcher');
+const optionPanel = document.getElementById('bgOptionPanel');
 
 toggleBtn.addEventListener('click', (e) => {
   e.stopPropagation();
-  const opening = !optionPanel.classList.contains('open');
   optionPanel.classList.toggle('open');
   toggleBtn.classList.toggle('active');
-  // Đóng color picker khi đóng option panel
-  if (!opening) hideColorPicker();
 });
 
-// Click ngoài cả 2 panel → đóng hết
 document.addEventListener('click', (e) => {
-  const inSwitcher = switcher.contains(e.target);
-  const inColorPanel = colorPanel.contains(e.target);
-  if (!inSwitcher && !inColorPanel) {
-    closePanels();
+  if (!switcher.contains(e.target)) {
+    optionPanel.classList.remove('open');
+    toggleBtn.classList.remove('active');
   }
-});
-
-// Reset về default
-document.getElementById('cpResetBtn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  const def = {h:20, s:44, l:7}; // màu nền mặc định app #1a0f0a
-  localStorage.setItem('focusroom_bg_custom', JSON.stringify(def));
-  showColorPicker(def);
-  applyCustomColor(def.h, def.s, def.l);
 });
 
 document.querySelectorAll('.bg-option').forEach(btn => {
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
     setEffect(btn.dataset.effect);
-    // Chỉ giữ option panel mở khi chọn custom (để xem color picker)
-    if (btn.dataset.effect !== 'custom') {
-      optionPanel.classList.remove('open');
-      toggleBtn.classList.remove('active');
-    }
+    optionPanel.classList.remove('open');
+    toggleBtn.classList.remove('active');
   });
 });
 
-// ===== INIT =====
 const savedBg = localStorage.getItem('focusroom_bg') || 'none';
 setEffect(savedBg);
-console.log('🎨 bg.js | effect:', savedBg);
+console.log('bg.js started | effect:', savedBg);

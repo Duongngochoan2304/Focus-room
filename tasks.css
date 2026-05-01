@@ -9,13 +9,7 @@
 /* ===== RESET (chỉ áp dụng khi dùng tasks.css độc lập) ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-  min-height: 100vh;
-  font-family: 'DM Mono', monospace;
-  background: #1a0f0a;
-  color: #f0e6df;
-  overflow: hidden;
-}
+/* body background handled by style.css */
 
 
 /* ===== WIDGET CONTAINER (góc trên trái) ===== */
@@ -37,7 +31,7 @@ body {
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  background: rgba(20, 12, 8, 0.8);
+  background: rgba(24, 5, 40, 0.85);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 12px;
   backdrop-filter: blur(16px);
@@ -103,8 +97,8 @@ body {
 }
 
 #expandBtn:hover {
-  background: rgba(224,92,66,0.15);
-  border-color: rgba(224,92,66,0.4);
+  background: rgba(82, 34, 122, 0.662);
+  border-color: rgba(170, 94, 196, 0.25);
   color: #f0e6df;
 }
 
@@ -113,7 +107,7 @@ body {
 #taskPanel {
   margin-top: 6px;
   width: 300px;
-  background: rgba(20, 12, 8, 0.85);
+  background: rgba(24, 5, 40, 0.85);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 14px;
   backdrop-filter: blur(20px);
@@ -202,9 +196,9 @@ body {
 }
 
 .tab.active {
-  background: rgba(224,92,66,0.2);
+  background: rgba(155,77,181,0.25);
   color: #f0e6df;
-  border: 1px solid rgba(224,92,66,0.3);
+  border: 1px solid rgba(155,77,181,0.4);
 }
 
 /* Nút thu panel về mini bar */
@@ -298,8 +292,8 @@ body {
 /* Nút "+ Thêm" bên trong section label */
 .section-label button {
   background: none;
-  border: 1px solid rgba(224,92,66,0.3);
-  color: rgba(224,92,66,0.7);
+  border: 1px solid rgba(155, 77, 181, 0.5);
+  color: rgba(255, 255, 255, 0.781);
   cursor: pointer;
   font-family: 'DM Mono', monospace;
   font-size: 9px;
@@ -310,8 +304,8 @@ body {
 }
 
 .section-label button:hover {
-  background: rgba(224,92,66,0.1);
-  color: #e05c42;
+  background: rgba(146, 34, 126, 0.068);
+  color: #9b4db5;
 }
 
 
@@ -360,15 +354,15 @@ ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
 }
 
 .task-check:hover {
-  border-color: #e05c42;
-  background: rgba(224,92,66,0.1);
-  color: #e05c42;
+  border-color: #9b4db5;
+  background: rgba(224, 66, 216, 0.1);
+  color: #9b4db5;
 }
 
 /* Task đã tick: nền cam đầy */
 .task-item.done .task-check {
-  background: #e05c42;
-  border-color: #e05c42;
+  background: #9b4db5;
+  border-color: #9b4db5;
   color: #fff;
 }
 
@@ -400,7 +394,7 @@ ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
   line-height: 1;
 }
 
-.task-delete:hover { color: rgba(224,92,66,0.7); }
+.task-delete:hover { color: rgba(224, 66, 192, 0.7); }
 
 
 /* ===== FORM THÊM NHIỆM VỤ ===== */
@@ -429,7 +423,7 @@ ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
   outline: none;
 }
 
-#taskInput:focus { border-color: rgba(224,92,66,0.4); }
+#taskInput:focus { border-color: rgba(224, 66, 163, 0.4); }
 
 .form-row {
   display: flex;
@@ -458,12 +452,12 @@ ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
   font-size: 11px;
   cursor: pointer;
   transition: all 0.2s;
-  border: 1px solid rgba(224,92,66,0.4);
-  background: rgba(224,92,66,0.15);
+  border: 1px solid rgba(219, 66, 224, 0.4);
+  background: rgba(224, 66, 198, 0.15);
   color: #f0e6df;
 }
 
-.form-row button:hover { background: rgba(224,92,66,0.28); }
+.form-row button:hover { background: rgba(205, 60, 154, 0.28); }
 
 /* Nút Huỷ */
 .form-row button.secondary {
@@ -502,8 +496,8 @@ ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
 
 /* Item đã mở khoá: viền vàng nhạt */
 .shop-item.unlocked {
-  border-color: rgba(245,200,66,0.25);
-  background: rgba(245,200,66,0.05);
+  border-color: rgba(155, 48, 141, 0.352);
+  background: rgba(78, 15, 63, 0.203);
 }
 
 .shop-icon { font-size: 20px; line-height: 1; }
@@ -577,9 +571,9 @@ ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%) scale(0.92);
-  background: rgba(20, 12, 8, 0.97);
+  background: rgba(49, 18, 38, 0.97);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(240, 230, 223, 0.65);
+  color: rgba(255, 255, 255, 0.65);
   font-size: 9px;
   letter-spacing: 0.1em;
   white-space: nowrap;

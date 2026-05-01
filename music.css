@@ -18,7 +18,7 @@
   padding: 13px 18px 13px;
   width: 220px;
 
-  background: rgba(20, 12, 8, 0.85);
+  background: rgba(24, 5, 40, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   backdrop-filter: blur(20px);
@@ -52,7 +52,7 @@
 .music-dot {
   width: 2px;
   border-radius: 1px;
-  background: #e05c42;
+  background: #9b4db5;
   animation: barBounce 0.9s ease-in-out infinite;
 }
 
@@ -112,9 +112,9 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 1.5px solid rgba(224, 92, 66, 0.5);
-  background: rgba(224, 92, 66, 0.16);
-  color: #e05c42;
+  border: 1.5px solid rgba(155, 77, 181, 0.5);
+  background: rgba(155, 77, 181, 0.16);
+  color: #9b4db5;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -125,9 +125,9 @@
 }
 
 #musicPlayBtn:hover {
-  background: rgba(224, 92, 66, 0.3);
-  border-color: rgba(224, 92, 66, 0.8);
-  box-shadow: 0 0 12px rgba(224, 92, 66, 0.22);
+  background: rgba(155, 77, 181, 0.3);
+  border-color: rgba(155, 77, 181, 0.8);
+  box-shadow: 0 0 12px rgba(155, 77, 181, 0.22);
   transform: scale(1.07);
 }
 
@@ -180,8 +180,8 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #e05c42;
-  box-shadow: 0 0 4px rgba(224, 92, 66, 0.7);
+  background: #9b4db5;
+  box-shadow: 0 0 4px rgba(155, 77, 181, 0.7);
 }
 
 
@@ -249,12 +249,8 @@
   text-align: center;
 }
 
-/* Slider dọc */
+/* Slider dọc — writing-mode và direction đặt inline trong HTML (tránh deprecation) */
 #musicVolumeSlider {
-  -webkit-appearance: slider-vertical;
-  writing-mode: vertical-lr;
-  direction: rtl;
-  appearance: slider-vertical;
   width: 4px;
   height: 52px;
   border-radius: 2px;
@@ -262,7 +258,7 @@
   cursor: pointer;
   padding: 0;
   background: rgba(255, 255, 255, 0.1);
-  accent-color: #e05c42;
+  accent-color: #9b4db5;
 }
 
 #musicVolumeSlider::-webkit-slider-thumb {
@@ -270,10 +266,10 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #e05c42;
+  background: #9b4db5;
   cursor: pointer;
   border: none;
-  box-shadow: 0 0 6px rgba(224, 92, 66, 0.5);
+  box-shadow: 0 0 6px rgba(155, 77, 181, 0.5);
   transition: transform 0.15s;
 }
 
@@ -283,7 +279,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #e05c42;
+  background: #9b4db5;
   border: none;
   cursor: pointer;
 }
@@ -337,8 +333,8 @@
 
 /* Option đang phát — viền cam, nền nhạt */
 .wn-option.wn-active {
-  background: rgba(224, 92, 66, 0.14);
-  border-color: rgba(224, 92, 66, 0.45);
+  background: rgba(155, 77, 181, 0.14);
+  border-color: rgba(155, 77, 181, 0.45);
 }
 
 /* Icon (emoji hoặc img) */
@@ -364,5 +360,5 @@
 }
 
 .wn-option.wn-active .wn-label {
-  color: rgba(224, 92, 66, 0.85);
+  color: rgba(155, 77, 181, 0.85);
 }

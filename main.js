@@ -57,8 +57,8 @@ function updateCircle() {
   }
 
   // Màu cam cho cả 2 mode (có thể tuỳ chỉnh sau)
-  circle.style.stroke = "#e05c42";
-  circle.style.filter = "drop-shadow(0 0 6px rgba(224,92,66,0.6))";
+  circle.style.stroke = "#9b4db5";
+  circle.style.filter = "drop-shadow(0 0 6px rgba(155,77,181,0.6))";
   circle.style.strokeDashoffset = offset;
 }
 
@@ -135,8 +135,8 @@ function renderFill() {
   if (sessionIndex < totalSessions && dots[sessionIndex]) {
     const dot         = dots[sessionIndex];
     const isFocusDot  = sessionIndex % 2 === 0;
-    const color       = isFocusDot ? "224,92,66" : "78,168,160"; // cam : teal
-    const borderColor = isFocusDot ? "#e05c42" : "#e05c42";
+    const color       = isFocusDot ? "155,77,181" : "78,168,160"; // cam : teal
+    const borderColor = isFocusDot ? "#9b4db5" : "#9b4db5";
 
     dot.style.background  = `rgba(${color}, ${fraction})`;
     dot.style.borderColor = borderColor;
@@ -148,7 +148,7 @@ function renderFill() {
   const segmentSize = totalSessions > 1 ? 1 / (totalSessions - 1) : 1;
   const pct = Math.min((sessionIndex + fraction) * segmentSize * 100, 100);
   progressFill.style.width      = pct + "%";
-  progressFill.style.background = "#e05c42";
+  progressFill.style.background = "#9b4db5";
 }
 
 

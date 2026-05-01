@@ -26,6 +26,9 @@
   <!-- Lớp vignette mờ viền cho UI dễ đọc hơn -->
   <div id="roomVignette"></div>
 
+  <!-- Gradient nền tím hồng — CSS thuần, chắc chắn hiển thị -->
+  <div id="bgGradient"></div>
+
   <!-- Canvas background effects (dưới room canvas) -->
   <canvas id="bgCanvas"></canvas>
 
@@ -47,10 +50,6 @@
         <span class="bg-icon">❄️</span>
         <span class="bg-label">Tuyết</span>
       </button>
-      <button class="bg-option" data-effect="ocean">
-        <span class="bg-icon">🌊</span>
-        <span class="bg-label">Đại dương</span>
-      </button>
       <button class="bg-option" data-effect="custom">
         <span class="bg-icon">🎨</span>
         <span class="bg-label">Màu sắc</span>
@@ -59,28 +58,6 @@
   </div>
 
   <!-- Color picker — fixed, luôn nằm trong màn hình -->
-  <div id="colorPickerPanel">
-    <div class="cp-header">
-      <span class="cp-title">Tuỳ chỉnh nền</span>
-      <button id="cpResetBtn">Reset</button>
-    </div>
-    <div id="cpPreview"></div>
-    <div class="cp-row">
-      <span class="cp-label">Màu sắc</span>
-      <input type="range" id="cpHue" min="0" max="360" value="250">
-      <span class="cp-val" id="cpHueVal">250°</span>
-    </div>
-    <div class="cp-row">
-      <span class="cp-label">Bão hoà</span>
-      <input type="range" id="cpSat" min="0" max="100" value="35">
-      <span class="cp-val" id="cpSatVal">35%</span>
-    </div>
-    <div class="cp-row">
-      <span class="cp-label">Độ sáng</span>
-      <input type="range" id="cpLit" min="0" max="40" value="7">
-      <span class="cp-val" id="cpLitVal">7%</span>
-    </div>
-  </div>
 
   <!-- Lớp nhiễu texture nền, trang trí -->
   <div class="noise"></div>

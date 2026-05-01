@@ -19,9 +19,19 @@ body {
   align-items: center;
   justify-content: center;
   font-family: 'DM Mono', monospace;
-  background: #1a0f0a;
+  background: transparent; /* gradient do #bgGradient div xử lý */
   color: #f0e6df;
   overflow: hidden; /* không cho scroll, UI cố định */
+}
+
+/* ===== GRADIENT NỀN TÍM HỒNG ===== */
+/* Luôn hiển thị dưới tất cả canvas — z-index thấp nhất */
+#bgGradient {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, #6816b9 0%, #4b187d 50%, #010030 100%);
 }
 
 /* Lớp texture nhiễu trang trí nền (SVG filter fractalNoise) */
@@ -44,7 +54,7 @@ body::before {
   transform: translateX(-50%);
   width: 600px;
   height: 400px;
-  background: radial-gradient(ellipse, rgba(200, 80, 60, 0.15) 0%, transparent 70%);
+  background: radial-gradient(ellipse, rgba(180, 80, 200, 0.18) 0%, transparent 70%); /* tím hồng */
   pointer-events: none;
   z-index: 0;
 }
@@ -58,7 +68,7 @@ body::before {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 1;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -110,7 +120,7 @@ h1 {
 #progressFill {
   height: 100%;
   width: 0%;
-  background: #e05c42;
+  background: #9b4db5;
   border-radius: 2px;
   transition: width 0.5s ease, background 0.5s ease;
 }
@@ -122,33 +132,33 @@ h1 {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #2a1810;  /* màu nền đặc để che đường line bên dưới */
+  background: #8b11aa47;  /* màu nền đặc để che đường line bên dưới */
   border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Dot đang chạy: viền cam, phình nhẹ (scale qua JS) */
 .dot.active {
-  background: #2a1810;
-  border-color: #e05c42;
+  background: #491c4e;
+  border-color: #9b4db5;
   transform: scale(1.25);
 }
 
 /* Dot focus đã xong */
 .dot.done-focus {
-  background: #e05c42;
-  border-color: #e05c42;
+  background: #9b4db5;
+  border-color: #9b4db5;
 }
 
 /* Dot break đã xong */
 .dot.done-break {
-  background: #e05c42;
-  border-color: #e05c42;
+  background: #c06090;
+  border-color: #c06090;
 }
 
 
 /* ===== KHUNG KÍNH (glassmorphism) ===== */
 #glassFrame {
-  background: rgba(180, 170, 160, 0.12);
+  background: rgba(120, 60, 150, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   backdrop-filter: blur(16px);          /* làm mờ nội dung phía sau */
@@ -193,7 +203,7 @@ circle {
 
 /* Vòng tiến trình: stroke-dashoffset thay đổi qua JS */
 .progress {
-  stroke: #e05c42;
+  stroke: #9b4db5;
   stroke-linecap: round; /* đầu stroke bo tròn */
   stroke-dasharray: 553; /* ≈ chu vi (2π×88) */
   stroke-dashoffset: 0;
@@ -246,15 +256,15 @@ circle {
 }
 
 .preset-btn:hover {
-  background: rgba(224, 92, 66, 0.1);
-  border-color: rgba(224, 92, 66, 0.35);
+  background: rgba(155, 77, 181, 0.1);
+  border-color: rgba(155, 77, 181, 0.35);
   color: rgba(240, 230, 223, 0.8);
 }
 
 /* Preset đang được chọn */
 .preset-btn.active {
-  background: rgba(224, 92, 66, 0.18);
-  border-color: rgba(224, 92, 66, 0.6);
+  background: rgba(155, 77, 181, 0.18);
+  border-color: rgba(155, 77, 181, 0.6);
   color: #f0e6df;
 }
 
@@ -309,13 +319,13 @@ circle {
 }
 
 .custom-row input:focus {
-  border-color: rgba(224,92,66,0.5);
+  border-color: rgba(174, 106, 197, 0.5);
 }
 
 #customApplyBtn {
   padding: 8px;
-  border: 1px solid rgba(224,92,66,0.4);
-  background: rgba(224,92,66,0.12);
+  border: 1px solid rgba(155, 77, 181, 0.5);
+  background: rgba(73, 45, 82, 0.467);
   color: #f0e6df;
   cursor: pointer;
   font-family: 'DM Mono', monospace;
@@ -326,7 +336,7 @@ circle {
 }
 
 #customApplyBtn:hover {
-  background: rgba(224,92,66,0.25);
+  background: rgba(155, 77, 181, 0.5);
 }
 
 
@@ -352,8 +362,8 @@ circle {
 }
 
 .controls button:hover {
-  background: rgba(224, 92, 66, 0.15);
-  border-color: rgba(224, 92, 66, 0.5);
+  background: rgba(155, 77, 181, 0.15);
+  border-color: rgba(155, 77, 181, 0.5);
   color: #f0e6df;
 }
 
@@ -379,7 +389,7 @@ circle {
   top: 20px;
   right: 20px;
   z-index: 100;
-  background: rgba(30, 18, 12, 0.75);
+  background: rgba(24, 5, 40, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 16px;
   backdrop-filter: blur(20px);
@@ -441,8 +451,8 @@ circle {
 }
 
 .mini-controls button:hover {
-  background: rgba(224, 92, 66, 0.2);
-  border-color: rgba(224, 92, 66, 0.5);
+  background: rgba(155, 77, 181, 0.2);
+  border-color: rgba(155, 77, 181, 0.5);
   color: #f0e6df;
 }
 

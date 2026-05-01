@@ -15,8 +15,8 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(20, 12, 8, 0.85);
+  border: 1px solid rgba(155, 77, 181, 0.3);
+  background: rgba(24, 5, 40, 0.85);;
   color: rgba(240, 230, 223, 0.7);
   font-size: 18px;
   cursor: pointer;
@@ -30,16 +30,16 @@
 }
 
 #journalToggleBtn:hover {
-  background: rgba(224, 92, 66, 0.2);
-  border-color: rgba(224, 92, 66, 0.5);
+  background: rgba(82, 34, 122, 0.662);
+  border-color: rgba(155, 77, 181, 0.5);
   color: #f0e6df;
   transform: scale(1.08);
 }
 
 /* Khi journal đang mở: nút đổi màu để báo hiệu */
 #journalToggleBtn.active {
-  background: rgba(224, 92, 66, 0.25);
-  border-color: rgba(224, 92, 66, 0.6);
+  background: rgba(155, 77, 181, 0.25);
+  border-color: rgba(155, 77, 181, 0.6);
   color: #f0e6df;
 }
 
@@ -111,9 +111,9 @@
   flex-shrink: 0;
   background: linear-gradient(
     to right,
-    rgba(10, 5, 2, 0.9),  /* cạnh trái tối hơn */
-    rgba(40, 25, 15, 0.8), /* giữa sáng hơn chút */
-    rgba(10, 5, 2, 0.9)   /* cạnh phải tối lại */
+    rgba(10, 2, 9, 0.9),  /* cạnh trái tối hơn */
+    rgba(62, 24, 54, 0.929), /* giữa sáng hơn chút */
+    rgba(10, 2, 8, 0.9)   /* cạnh phải tối lại */
   );
   position: relative;
   z-index: 2;
@@ -136,8 +136,8 @@
   width: 2px;
   background: repeating-linear-gradient(
     to bottom,
-    rgba(240, 180, 100, 0.15) 0px,
-    rgba(240, 180, 100, 0.15) 3px,
+    rgba(240, 100, 233, 0.15) 0px,
+    rgba(240, 100, 233, 0.15) 3px,
     transparent 3px,
     transparent 12px
   );
@@ -150,9 +150,9 @@
   flex: 1;
   background: linear-gradient(
     135deg,
-    #1c1007 0%,
-    #170e06 50%,
-    #1a0f08 100%
+    #010030 0%,
+    #4b187d 60%,
+    #6816b9 100%
   );
   border-right: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
@@ -215,8 +215,8 @@
 }
 
 .cal-nav-btn:hover {
-  background: rgba(224, 92, 66, 0.15);
-  border-color: rgba(224, 92, 66, 0.4);
+  background: rgba(155, 77, 181, 0.15);
+  border-color: rgba(155, 77, 181, 0.4);
   color: #f0e6df;
 }
 
@@ -237,7 +237,7 @@
   font-size: 9px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: rgba(240, 230, 223, 0.25);
+  color: rgba(240, 230, 223, 0.378);
   padding: 2px 0;
 }
 
@@ -258,7 +258,7 @@
   align-items: center;
   justify-content: center;
   font-size: 11px;
-  color: rgba(240, 230, 223, 0.5);
+  color: rgba(240, 230, 223, 0.547);
   border-radius: 6px;
   cursor: pointer;
   border: 1px solid transparent;
@@ -268,22 +268,22 @@
 }
 
 .cal-day:hover {
-  background: rgba(224, 92, 66, 0.12);
-  border-color: rgba(224, 92, 66, 0.3);
+  background: rgba(155, 77, 181, 0.12);
+  border-color: rgba(177, 84, 207, 0.616);
   color: rgba(240, 230, 223, 0.9);
 }
 
 /* Ngày hôm nay: viền cam nổi bật */
 .cal-day.today {
-  border-color: rgba(224, 92, 66, 0.5);
-  color: #e05c42;
+  border-color: rgba(187, 80, 222, 0.781);
+  color: #ab4bcb;
   font-weight: 500;
 }
 
 /* Ngày đang được chọn (có journal) */
 .cal-day.selected {
-  background: rgba(224, 92, 66, 0.22);
-  border-color: rgba(224, 92, 66, 0.7);
+  background: rgba(182, 84, 214, 0.662);
+  border-color: rgba(198, 85, 236, 0.934);
   color: #f0e6df;
   font-weight: 500;
 }
@@ -319,9 +319,9 @@
   flex: 1;
   background: linear-gradient(
     135deg,
-    #1f1209 0%,
-    #1a0e06 60%,
-    #1c1008 100%
+    #6816b9 0%,
+    #4b187d 60%,
+    #010030 100%
   );
   display: flex;
   flex-direction: column;
@@ -351,7 +351,7 @@
   bottom: 0;
   left: 36px;
   width: 1px;
-  background: rgba(224, 92, 66, 0.08);
+  background: rgba(155, 77, 181, 0.08);
   pointer-events: none;
 }
 
@@ -394,9 +394,9 @@
 }
 
 #journalClearBtn:hover {
-  background: rgba(224, 92, 66, 0.1);
-  border-color: rgba(224, 92, 66, 0.35);
-  color: rgba(224, 92, 66, 0.8);
+  background: rgba(155, 77, 181, 0.1);
+  border-color: rgba(155, 77, 181, 0.35);
+  color: rgba(155, 77, 181, 0.8);
 }
 
 
@@ -426,8 +426,14 @@
   align-items: center;
   gap: 16px;
   padding: 12px 18px;
-  background: rgba(18, 10, 5, 0.97);
-  border: 1px solid rgba(224, 92, 66, 0.3);
+  /* 1. Nền nên có độ trong suốt thấp hơn một chút để thấy rõ hiệu ứng mờ */
+  background: rgba(155, 77, 181, 0.25); 
+
+  /* 2. HIỆU ỨNG BLUR NỀN QUAN TRỌNG */
+  backdrop-filter: blur(10px); 
+  -webkit-backdrop-filter: blur(10px); /* Hỗ trợ Safari */
+  background: rgba(155, 77, 181, 0.38);;
+  border: 1px solid rgba(155, 77, 181, 0.3);
   border-radius: 50px; /* pill */
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.55),
@@ -488,8 +494,8 @@
 /* Nút Xoá — accent đỏ cam */
 .confirm-delete-btn {
   padding: 5px 14px;
-  background: rgba(224, 92, 66, 0.2);
-  border: 1px solid rgba(224, 92, 66, 0.55);
+  background: rgba(155, 77, 181, 0.2);
+  border: 1px solid rgba(155, 77, 181, 0.55);
   color: #f0e6df;
   cursor: pointer;
   font-family: 'DM Mono', monospace;
@@ -500,8 +506,8 @@
 }
 
 .confirm-delete-btn:hover {
-  background: rgba(224, 92, 66, 0.38);
-  border-color: rgba(224, 92, 66, 0.8);
+  background: rgba(155, 77, 181, 0.38);
+  border-color: rgba(155, 77, 181, 0.8);
 }
 
 
@@ -518,7 +524,7 @@
   font-size: 12px;
   line-height: 2;           /* khoảng cách dòng thoáng, giống trang kẻ */
   letter-spacing: 0.03em;
-  caret-color: #e05c42;     /* con trỏ màu cam */
+  caret-color: #9b4db5;     /* con trỏ màu cam */
   position: relative;
   z-index: 1;
   padding-left: 8px;
@@ -633,9 +639,9 @@
     height: 12px;
     background: linear-gradient(
       to bottom,
-      rgba(10, 5, 2, 0.9),
-      rgba(40, 25, 15, 0.8),
-      rgba(10, 5, 2, 0.9)
+      rgba(155, 77, 181, 0.38),
+      rgba(155, 77, 181, 0.38),
+      rgba(155, 77, 181, 0.38)
     );
   }
 
