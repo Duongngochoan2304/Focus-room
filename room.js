@@ -5,9 +5,10 @@
 
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { setupLighting, enableModelShadow, updateLightTarget } from "./lighting.js";
 
 // ===== PATH =====
-const GLB_PATH = './gkuet.glb';
+const GLB_PATH = '/gkuet.glb';
 
 // ===== RENDERER =====
 const canvas = document.querySelector('#roomCanvas');
@@ -16,11 +17,10 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight, true);
 renderer.setClearColor(0x000000, 0); // alpha=0: trong suốt hoàn toàn → gradient CSS hiện qua
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.3;
+renderer.toneMappingExposure = 0.8;
 
 // ===== SCENE =====
 const scene = new THREE.Scene();
-// scene.background = null — transparent, body gradient shows through
 
 // ===== CAMERA =====
 const camera = new THREE.PerspectiveCamera(
@@ -31,12 +31,8 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.set(6.35, 2.45, 30);
 
-// ===== ÁNH SÁNG =====
-scene.add(new THREE.AmbientLight(0xffffff, 4.0)); // sáng hơn để thấy model
-const dir = new THREE.DirectionalLight(0xffffff, 3.5);
-dir.position.set(6, 8, 10);
-scene.add(dir);
-scene.add(new THREE.HemisphereLight(0xffe8c0, 0x3a1508, 1.0));
+// ===== ÁNH SÁNG — dùng lighting.js =====
+setupLighting(scene, renderer);
 
 // ===== CAMERA ORBIT STATE =====
 // Dùng spherical coordinates để xoay quanh target
@@ -169,7 +165,39 @@ loader.load(
     const center = box.getCenter(new THREE.Vector3());
     const size   = box.getSize(new THREE.Vector3());
 
-    // Cập nhật target về tâm thực của model
+    // Bật shadow
+    enableModelShadow(gltf.scene);
+
+    // Đặt spotlight đúng trên tâm model thực
+    updateLightTarget(center);
+
+    // Convert material để nhận ánh sáng
+    gltf.scene.traverse((child) => {
+      if (!child.isMesh) return;
+      const mats = Array.isArray(child.material)
+        ? child.material
+        : [child.material];
+
+      const converted = mats.map((mat) => {
+        if (!mat.isMeshBasicMaterial) return mat; // giữ nguyên nếu không phải Basic
+        const std = new THREE.MeshStandardMaterial({
+          color:       mat.color,
+          map:         mat.map       ?? null,
+          transparent: mat.transparent,
+          opacity:     mat.opacity,
+          side:        mat.side,
+          roughness:   0.85,
+          metalness:   0.05,
+        });
+        mat.dispose();
+        return std;
+      });
+
+      child.material = Array.isArray(child.material) ? converted : converted[0];
+      child.material.needsUpdate = true;
+    });
+
+    // Cập nhật camera target
     target.copy(center);
 
     // Zoom intro: bắt đầu từ xa
