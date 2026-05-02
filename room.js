@@ -8,7 +8,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { setupLighting, enableModelShadow, updateLightTarget } from "./lighting.js";
 
 // ===== PATH =====
-const GLB_PATH = '/gkuet.glb';
+const GLB_PATH = './gkuet.glb';
 
 // ===== RENDERER =====
 const canvas = document.querySelector('#roomCanvas');
