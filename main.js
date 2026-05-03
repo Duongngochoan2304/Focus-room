@@ -25,16 +25,21 @@ let tickStartLeft    = null;      // timeLeft lúc bắt đầu tick
 
 
 // ===== THAM CHIẾU DOM =====
-const timerDisplay    = document.getElementById("timer");          // số giờ giữa vòng tròn
-const statusDisplay   = document.getElementById("status");         // dòng trạng thái
-const circle          = document.getElementById("progressCircle"); // vòng SVG tiến trình
+const timerDisplay    = document.getElementById("timer");
+const statusDisplay   = document.getElementById("status");
+const circle          = document.getElementById("progressCircle");
 const circleContainer = document.getElementById("circleContainer");
-const progressFill    = document.getElementById("progressFill");   // fill ngang progress track
-const progressTrack   = document.getElementById("progressTrack"); // thanh chứa các dot
-const uiFull          = document.getElementById("uiFull");         // container full UI
-const miniWidget      = document.getElementById("miniWidget");     // widget mini góc phải
-const miniTimerEl     = document.getElementById("miniTimer");      // số giờ ở mini
-const miniStatusEl    = document.getElementById("miniStatus");     // trạng thái ở mini
+const progressFill    = document.getElementById("progressFill");
+const progressTrack   = document.getElementById("progressTrack");
+const uiFull          = document.getElementById("uiFull");
+const miniWidget      = document.getElementById("miniWidget");
+const miniTimerEl     = document.getElementById("miniTimer");
+const miniStatusEl    = document.getElementById("miniStatus");
+
+// Float timer refs
+const floatTimerEl  = document.getElementById("floatTimer");
+const floatTimeEl   = document.getElementById("floatTime");
+const floatModeEl   = document.getElementById("floatMode");
 
 
 // ===== VÒNG TRÒN SVG =====
@@ -75,6 +80,10 @@ function updateDisplay() {
 
   timerDisplay.textContent = timeStr;  // số giờ full UI
   miniTimerEl.textContent  = timeStr;  // số giờ mini widget
+
+  // Float timer — luôn sync
+  if (floatTimeEl) floatTimeEl.textContent = timeStr;
+  if (floatModeEl) floatModeEl.textContent = currentMode === "focus" ? "🎯" : "☕";
 
   updateCircle();
   renderFill();
@@ -331,10 +340,42 @@ function goFull() {
 }
 
 
+// ===== HIỆN / ẨN FLOAT TIMER =====
+function showFloatTimer() {
+  if (!floatTimerEl) return;
+  floatTimerEl.classList.remove("float-hidden");
+}
+
+function hideFloatTimer() {
+  if (!floatTimerEl) return;
+  floatTimerEl.classList.add("float-hidden");
+}
+
 // ===== SYNC KHI TAB ĐƯỢC FOCUS LẠI =====
-// Trình duyệt throttle setTimeout khi tab ẩn → cần sync lại ngay
+// Dùng cả 3 event để bắt mọi trường hợp chuyển tab / chuyển app
+// trên tất cả trình duyệt (Chrome, Cốc Cốc, Firefox, Safari...)
+
 document.addEventListener("visibilitychange", () => {
+  // Sync timer khi quay lại tab
   if (!document.hidden && isRunning) {
+    const elapsed = Math.floor((Date.now() - tickStartTime) / 1000);
+    timeLeft = Math.max(tickStartLeft - elapsed, 0);
+    updateDisplay();
+  }
+  // Hiện/ẩn float timer
+  document.hidden ? showFloatTimer() : hideFloatTimer();
+});
+
+// window blur: người dùng chuyển sang tab/app khác
+window.addEventListener("blur", () => {
+  showFloatTimer();
+});
+
+// window focus: người dùng quay lại tab này
+window.addEventListener("focus", () => {
+  hideFloatTimer();
+  // Sync timer khi quay lại
+  if (isRunning) {
     const elapsed = Math.floor((Date.now() - tickStartTime) / 1000);
     timeLeft = Math.max(tickStartLeft - elapsed, 0);
     updateDisplay();
@@ -343,15 +384,106 @@ document.addEventListener("visibilitychange", () => {
 
 
 // ===== GÁN SỰ KIỆN NÚT =====
-document.getElementById("startBtn").onclick       = startTimer;
-document.getElementById("pauseBtn").onclick       = pauseTimer;
-document.getElementById("resetBtn").onclick       = resetTimer;
-document.getElementById("clockCollapseBtn").onclick = goMini;    // thu về mini
-document.getElementById("miniStartBtn").onclick   = startTimer;
-document.getElementById("miniPauseBtn").onclick   = pauseTimer;
-document.getElementById("miniExpandBtn").onclick  = goFull;      // mở rộng về full
+document.getElementById("startBtn").onclick         = startTimer;
+document.getElementById("pauseBtn").onclick         = pauseTimer;
+document.getElementById("resetBtn").onclick         = resetTimer;
+document.getElementById("clockCollapseBtn").onclick = goMini;
+document.getElementById("miniStartBtn").onclick     = startTimer;
+document.getElementById("miniPauseBtn").onclick     = pauseTimer;
+document.getElementById("miniExpandBtn").onclick    = goFull;
+
+// Float timer buttons
+if (document.getElementById("floatStartBtn")) {
+  document.getElementById("floatStartBtn").onclick = startTimer;
+}
+if (document.getElementById("floatPauseBtn")) {
+  document.getElementById("floatPauseBtn").onclick = pauseTimer;
+}
+
+
+// ===== FLOAT TIMER DRAG TO MOVE =====
+(function initFloatDrag() {
+  if (!floatTimerEl) return;
+
+  let dragging    = false;
+  let offsetX     = 0;
+  let offsetY     = 0;
+
+  // Khôi phục vị trí đã lưu
+  const saved = localStorage.getItem("focusroom_float_pos");
+  if (saved) {
+    try {
+      const { x, y } = JSON.parse(saved);
+      floatTimerEl.style.right = "auto";
+      floatTimerEl.style.left  = Math.max(8, Math.min(window.innerWidth  - 180, x)) + "px";
+      floatTimerEl.style.top   = Math.max(8, Math.min(window.innerHeight - 60,  y)) + "px";
+    } catch {}
+  }
+
+  function savePos() {
+    localStorage.setItem("focusroom_float_pos", JSON.stringify({
+      x: parseInt(floatTimerEl.style.left  || 0),
+      y: parseInt(floatTimerEl.style.top   || 20),
+    }));
+  }
+
+  // Mouse
+  floatTimerEl.addEventListener("mousedown", (e) => {
+    if (e.target.closest("#floatControls")) return; // click nút thì không drag
+    dragging = true;
+    const r  = floatTimerEl.getBoundingClientRect();
+    offsetX  = e.clientX - r.left;
+    offsetY  = e.clientY - r.top;
+    floatTimerEl.style.right      = "auto";
+    floatTimerEl.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+    floatTimerEl.classList.add("float-dragging");
+    e.preventDefault();
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (!dragging) return;
+    const fw = floatTimerEl.offsetWidth;
+    const fh = floatTimerEl.offsetHeight;
+    floatTimerEl.style.left = Math.max(8, Math.min(window.innerWidth  - fw - 8, e.clientX - offsetX)) + "px";
+    floatTimerEl.style.top  = Math.max(8, Math.min(window.innerHeight - fh - 8, e.clientY - offsetY)) + "px";
+  });
+
+  document.addEventListener("mouseup", () => {
+    if (!dragging) return;
+    dragging = false;
+    floatTimerEl.classList.remove("float-dragging");
+    floatTimerEl.style.transition = "opacity 0.3s ease, transform 0.3s ease, box-shadow 0.2s ease";
+    savePos();
+  });
+
+  // Touch
+  floatTimerEl.addEventListener("touchstart", (e) => {
+    if (e.target.closest("#floatControls")) return;
+    dragging = true;
+    const r = floatTimerEl.getBoundingClientRect();
+    offsetX = e.touches[0].clientX - r.left;
+    offsetY = e.touches[0].clientY - r.top;
+    floatTimerEl.style.right = "auto";
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener("touchmove", (e) => {
+    if (!dragging) return;
+    const fw = floatTimerEl.offsetWidth;
+    const fh = floatTimerEl.offsetHeight;
+    floatTimerEl.style.left = Math.max(8, Math.min(window.innerWidth  - fw - 8, e.touches[0].clientX - offsetX)) + "px";
+    floatTimerEl.style.top  = Math.max(8, Math.min(window.innerHeight - fh - 8, e.touches[0].clientY - offsetY)) + "px";
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener("touchend", () => {
+    if (!dragging) return;
+    dragging = false;
+    savePos();
+  });
+})();
 
 
 // ===== KHỞI TẠO =====
-uiFull.classList.add("hidden"); // bắt đầu ở chế độ mini
-applyPreset(document.querySelector(".preset-btn.active")); // load preset Classic
+uiFull.classList.add("hidden");
+applyPreset(document.querySelector(".preset-btn.active"));

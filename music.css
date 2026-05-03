@@ -362,3 +362,160 @@
 .wn-option.wn-active .wn-label {
   color: rgba(155, 77, 181, 0.85);
 }
+
+/* ===== LINK BUTTON (nút 🔗 trong top row) ===== */
+#musicLinkBtn {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: none;
+  color: rgba(240, 230, 223, 0.38);
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  padding: 0;
+  line-height: 1;
+}
+
+#musicLinkBtn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(240, 230, 223, 0.9);
+}
+
+/* Panel link đang mở */
+#musicLinkBtn.ml-btn-active {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* Dot đỏ nhỏ báo đang phát YouTube */
+#musicLinkBtn.yt-active::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #e05252;
+  box-shadow: 0 0 5px rgba(220, 80, 80, 0.75);
+}
+
+
+/* ===== LINK PANEL (ô nhập link YouTube) ===== */
+#musicLinkPanel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  max-height: 70px;
+  opacity: 1;
+  overflow: hidden;
+  transition: max-height 0.28s ease, opacity 0.22s ease, padding-top 0.22s ease;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+#musicLinkPanel.ml-hidden {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0;
+  border-top-color: transparent;
+}
+
+/* Hàng input + nút */
+#musicLinkInputRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Ô nhập link */
+#musicLinkInput {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: rgba(240, 230, 223, 0.85);
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+#musicLinkInput::placeholder {
+  color: rgba(240, 230, 223, 0.22);
+}
+
+#musicLinkInput:focus {
+  border-color: rgba(155, 77, 181, 0.5);
+  background: rgba(155, 77, 181, 0.05);
+}
+
+/* Nút phát ▶ */
+#musicLinkApplyBtn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid rgba(155, 77, 181, 0.45);
+  background: rgba(155, 77, 181, 0.16);
+  color: rgba(155, 77, 181, 0.9);
+  font-size: 9px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+#musicLinkApplyBtn:hover {
+  background: rgba(155, 77, 181, 0.3);
+  border-color: rgba(155, 77, 181, 0.75);
+}
+
+/* Nút xoá ✕ */
+#musicLinkClearBtn {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: none;
+  color: rgba(240, 230, 223, 0.3);
+  font-size: 9px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+#musicLinkClearBtn:hover {
+  background: rgba(220, 60, 60, 0.12);
+  border-color: rgba(220, 80, 80, 0.35);
+  color: rgba(220, 100, 100, 0.85);
+}
+
+/* Dòng trạng thái nhỏ dưới ô input */
+#musicLinkStatus {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  color: rgba(240, 230, 223, 0.28);
+  text-align: center;
+  letter-spacing: 0.05em;
+  min-height: 10px;
+  transition: color 0.2s;
+}

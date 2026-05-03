@@ -5,10 +5,100 @@
 
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { setupLighting, enableModelShadow, updateLightTarget } from "./lighting.js";
 
+
 // ===== PATH =====
-const GLB_PATH = './gkuet.glb';
+const GLB_PATH = '/gkuet.glb';
+
+// ===== CACHE KEY — đổi version khi update file GLB để xoá cache cũ =====
+const CACHE_KEY     = 'focusroom_glb_v1';
+const CACHE_DB_NAME = 'focusroom_cache';
+
+// ===== INDEXEDDB CACHE =====
+// Lưu ArrayBuffer của file GLB vào IndexedDB
+// Lần đầu: fetch từ server (~5-6s), lần sau: đọc cache (~0.1s)
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(CACHE_DB_NAME, 1);
+    req.onupgradeneeded = (e) => {
+      e.target.result.createObjectStore('models');
+    };
+    req.onsuccess = (e) => resolve(e.target.result);
+    req.onerror   = ()  => reject(req.error);
+  });
+}
+
+async function getCachedModel(key) {
+  try {
+    const db    = await openDB();
+    const tx    = db.transaction('models', 'readonly');
+    const store = tx.objectStore('models');
+    return await new Promise((res, rej) => {
+      const req      = store.get(key);
+      req.onsuccess  = () => res(req.result ?? null);
+      req.onerror    = () => rej(req.error);
+    });
+  } catch {
+    return null; // IndexedDB lỗi → bỏ qua, fetch bình thường
+  }
+}
+
+async function setCachedModel(key, buffer) {
+  try {
+    const db    = await openDB();
+    const tx    = db.transaction('models', 'readwrite');
+    tx.objectStore('models').put(buffer, key);
+  } catch {
+    // Nếu lỗi quota hoặc private mode → bỏ qua, không crash
+  }
+}
+
+// ===== LOAD GLB với CACHE =====
+async function loadGLBCached(path, onLoaded) {
+  const loader = new GLTFLoader();
+
+  // Thêm DRACOLoader để support file GLB nén Draco (nếu có)
+  const draco = new DRACOLoader();
+  draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+  loader.setDRACOLoader(draco);
+
+  // Thử lấy từ cache trước
+  const cached = await getCachedModel(CACHE_KEY);
+
+  if (cached) {
+    // Cache hit — parse trực tiếp từ ArrayBuffer, không cần fetch
+    console.log('⚡ GLB loaded from cache');
+    loader.parse(cached, '', onLoaded, (err) => {
+      console.error('❌ Parse cache error:', err);
+      // Cache bị hỏng → xoá và fetch lại
+      getCachedModel(CACHE_KEY).then(() => fetchAndCache(path, loader, onLoaded));
+    });
+  } else {
+    // Cache miss — fetch từ server rồi lưu cache
+    fetchAndCache(path, loader, onLoaded);
+  }
+}
+
+function fetchAndCache(path, loader, onLoaded) {
+  console.log('🌐 GLB fetching from server...');
+  fetch(path)
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.arrayBuffer();
+    })
+    .then(buffer => {
+      // Lưu vào cache cho lần sau
+      setCachedModel(CACHE_KEY, buffer);
+      // Parse ngay
+      loader.parse(buffer, '', onLoaded, (err) => {
+        console.error('❌ Parse error:', err);
+      });
+    })
+    .catch(err => console.error('❌ Fetch error:', err));
+}
 
 // ===== RENDERER =====
 const canvas = document.querySelector('#roomCanvas');
@@ -17,7 +107,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight, true);
 renderer.setClearColor(0x000000, 0); // alpha=0: trong suốt hoàn toàn → gradient CSS hiện qua
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.8;
+renderer.toneMappingExposure = 0.8; // điều chỉnh độ sáng tổng thể của scene
 
 // ===== SCENE =====
 const scene = new THREE.Scene();

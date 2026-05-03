@@ -24,8 +24,8 @@ export function setupLighting(scene, renderer) {
   // =====================================================
 
   const ambientLight = new THREE.AmbientLight(
-    0xffd6f0, // MÀU ÁNH SÁNG PHỤ — đổi màu tại đây
-              // gợi ý: 0xffe6c4 vàng ấm | 0xffd6f0 tím hồng | 0xffffff trắng
+    0xb6b5ed, // MÀU ÁNH SÁNG PHỤ — đổi màu tại đây
+              // gợi ý: 0xb6b5ed xanh đêm | 0xffd6f0 tím hồng | 0xffffff trắng
     0.5       // CƯỜNG ĐỘ ÁNH SÁNG PHỤ — tăng giảm tại đây
               // 0.0 = tối hoàn toàn | 0.5 = sáng vừa | 1.0+ = sáng nhiều
   );
@@ -42,7 +42,7 @@ export function setupLighting(scene, renderer) {
     0xfff2cc,    // MÀU ÁNH SÁNG CHÍNH — đổi màu tại đây
                  // gợi ý: 0xfff2cc vàng ấm | 0xffffff trắng | 0xffe0b2 cam nhẹ
 
-    2,           // CƯỜNG ĐỘ ÁNH SÁNG — tăng giảm tại đây
+    4,           // CƯỜNG ĐỘ ÁNH SÁNG — tăng giảm tại đây
                  // 2 = yếu | 5 = vừa | 10 = rất sáng
 
     10,          // KHOẢNG CÁCH CHIẾU XA — ánh sáng đi được bao xa (world units)
@@ -54,7 +54,7 @@ export function setupLighting(scene, renderer) {
                  // Math.PI / 4  (~45°) = vòng rộng
                  // Math.PI / 3  (~60°) = rất rộng
 
-    0.4,         // ĐỘ MỀM CỦA MÉP ÁNH SÁNG (penumbra)
+    0.5,         // ĐỘ MỀM CỦA MÉP ÁNH SÁNG (penumbra)
                  // 0.0 = mép cứng, rõ nét
                  // 0.4 = mép mờ dần tự nhiên  <-- hiện tại
                  // 1.0 = mép rất mờ
