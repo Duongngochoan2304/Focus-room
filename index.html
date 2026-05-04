@@ -96,6 +96,15 @@
 </head>
 <body>
 
+  <!-- Three.js via import map + ES module (cách duy nhất load GLTFLoader đúng) -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
   <!-- Canvas Three.js — phòng 3D nền toàn màn hình -->
   <canvas id="roomCanvas"></canvas>
   <!-- Lớp vignette mờ viền cho UI dễ đọc hơn -->
@@ -568,15 +577,7 @@
   <!-- Background effects -->
   <script type="module" src="bg.js"></script>
 
-  <!-- Three.js via import map + ES module (cách duy nhất load GLTFLoader đúng) -->
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-      }
-    }
-  </script>
+  
   <script type="module" src="room.js"></script>
 </body>
 </html>
