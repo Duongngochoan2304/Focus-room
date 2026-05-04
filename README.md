@@ -80,4 +80,4 @@ Tuỳ chỉnh không gian học tập với hiệu ứng nền:
 
 
 ## Author
-Developed by **Hoan Duong**
+Developed by **Nguyễn Hải Anh**, **Đặng Đức Bảo**, **Bùi Thành Đạt**, **Dương Ngọc Hoàn**, **Bùi Thanh Huyền**
