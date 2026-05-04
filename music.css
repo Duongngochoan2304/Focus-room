@@ -536,3 +536,7 @@
   font-size: 7px;
   line-height: 1;
 }
+#wnOffBtn .wn-icon {
+  color: rgba(240, 230, 223, 0.6);
+  font-size: 18px;
+}
