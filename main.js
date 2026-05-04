@@ -483,7 +483,7 @@ if (document.getElementById("floatPauseBtn")) {
   });
 })();
 // ===== ÂM THANH THÔNG BÁO =====
-const alarmAudio = new Audio("sounds/bao_thuc.mp3");
+const alarmAudio = new Audio("music/bao_thuc.mp3");
 alarmAudio.volume = 0.8;
 
 function playAlarm() {
