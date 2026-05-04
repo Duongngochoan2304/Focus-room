@@ -56,12 +56,26 @@ Tuỳ chỉnh không gian học tập với hiệu ứng nền:
 
 ---
 
-## Hướng phát triển
-Các tính năng dự kiến bổ sung:
-- Multiplayer study room
-- Avatar/character animation
-- Achievement & leveling system
-- Thêm nhiều theme phòng học
+## Các tính năng dự kiến bổ sung
+
+- 🌍 **Multiplayer Study Room**  
+  Cho phép nhiều người cùng tham gia một phòng học ảo để học nhóm và tăng động lực.
+
+- 🏠 **Multiple Room Themes**  
+  Bổ sung nhiều phong cách phòng học khác nhau như:
+  - Cozy room
+  - Modern workspace
+  - Night city view
+  - Minimalist room
+
+- 🔔 **Schedule Notifications**  
+  Thông báo lịch học, deadline và các lịch hẹn quan trọng.
+
+- 🛋 **Room Customization**  
+  Cho phép người dùng tự bố trí và cá nhân hóa không gian học tập:
+  - Sắp xếp nội thất
+  - Thay đổi vật phẩm trang trí
+  - Chỉnh màu sắc và theme phòng
 
 ---
 
