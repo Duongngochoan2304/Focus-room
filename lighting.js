@@ -26,7 +26,7 @@ export function setupLighting(scene, renderer) {
   const ambientLight = new THREE.AmbientLight(
     0xb6b5ed, // MÀU ÁNH SÁNG PHỤ — đổi màu tại đây
               // gợi ý: 0xb6b5ed xanh đêm | 0xffd6f0 tím hồng | 0xffffff trắng
-    0.5       // CƯỜNG ĐỘ ÁNH SÁNG PHỤ — tăng giảm tại đây
+    1       // CƯỜNG ĐỘ ÁNH SÁNG PHỤ — tăng giảm tại đây
               // 0.0 = tối hoàn toàn | 0.5 = sáng vừa | 1.0+ = sáng nhiều
   );
   scene.add(ambientLight);

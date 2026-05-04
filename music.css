@@ -519,3 +519,20 @@
   min-height: 10px;
   transition: color 0.2s;
 }
+
+/* ===== MUSIC LINK BUTTON — TRẠNG THÁI KHOÁ ===== */
+#musicLinkBtn.ml-locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+  position: relative;
+}
+
+/* Icon khoá nhỏ ở góc trên phải nút */
+#musicLinkBtn.ml-locked::before {
+  content: '🔒';
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  font-size: 7px;
+  line-height: 1;
+}

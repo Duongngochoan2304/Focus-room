@@ -313,7 +313,65 @@
   background: #f5c842; /* chấm vàng = có ghi chú */
 }
 
+/* Ngày đã điểm danh — viền cam lửa */
+.cal-day.attended {
+  border-color: #ff6b1a;
+  box-shadow:
+    0 0 6px rgba(255, 107, 26, 0.55),
+    inset 0 0 4px rgba(255, 107, 26, 0.15);
+  color: #ffcfa0;
+}
 
+.cal-day.attended:hover {
+  border-color: #ff8c42;
+  box-shadow:
+    0 0 10px rgba(255, 107, 26, 0.75),
+    inset 0 0 6px rgba(255, 107, 26, 0.25);
+}
+
+/* Ngày vừa attended vừa selected */
+.cal-day.attended.selected {
+  border-color: #ff6b1a;
+  background: rgba(255, 107, 26, 0.25);
+  box-shadow:
+    0 0 10px rgba(255, 107, 26, 0.7),
+    inset 0 0 8px rgba(255, 107, 26, 0.2);
+}
+
+/* ===== STREAK BOX ===== */
+#journalStreakBox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding: 8px 12px;
+  background: rgba(255, 107, 26, 0.1);
+  border: 1px solid rgba(255, 107, 26, 0.3);
+  border-radius: 10px;
+  backdrop-filter: blur(8px);
+}
+
+.streak-flame {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.streak-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px;
+  font-weight: 500;
+  color: #ff8c42;
+  line-height: 1;
+  letter-spacing: 0.03em;
+}
+
+.streak-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 180, 120, 0.65);
+}
 /* ===== TRANG PHẢI — JOURNAL ===== */
 #journalPage {
   flex: 1;

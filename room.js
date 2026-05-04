@@ -132,12 +132,12 @@ let theta   = 0;      // góc ngang (azimuth), radian
 let phi     = 0.1;    // góc dọc (polar), radian — 0=nhìn thẳng
 
 // Giới hạn xoay và zoom
-const PHI_MIN    = -0.5;   // không xoay quá lên trên
-const PHI_MAX    =  0.5;   // không xoay quá xuống dưới
-const THETA_MIN  = -0.6;   // giới hạn xoay trái
-const THETA_MAX  =  0.6;   // giới hạn xoay phải
-const RADIUS_MIN =  4;     // zoom in tối đa
-const RADIUS_MAX = 35;     // zoom out tối đa
+const PHI_MIN    = -0.3;   // không xoay quá lên trên
+const PHI_MAX    =  1.5;   // không xoay quá xuống dưới
+const THETA_MIN  = -0.3;   // giới hạn xoay trái
+const THETA_MAX  =  1.5;   // giới hạn xoay phải
+const RADIUS_MIN =  0.1;     // zoom in tối đa
+const RADIUS_MAX = 20;     // zoom out tối đa
 
 // Tốc độ
 const ROTATE_SPEED = 0.005; // radian / pixel kéo chuột

@@ -14,19 +14,19 @@ const SYSTEM_TASKS = [
     id: "sys_1",
     name: "Hoàn thành 1 phiên Pomodoro",
     reward: 10,
-    auto: true  // trigger: focusCount >= 1
+    auto: true
   },
   {
     id: "sys_2",
     name: "Hoàn thành 3 phiên liên tiếp",
     reward: 25,
-    auto: true  // trigger: focusCount >= 3
+    auto: true
   },
   {
     id: "sys_3",
     name: "Dùng app đủ 1 chu kỳ Pomodoro",
     reward: 50,
-    auto: true  // trigger: cycleComplete === true
+    auto: true
   },
   {
     id: "sys_4",
@@ -40,36 +40,84 @@ const SYSTEM_TASKS = [
     reward: 15,
     auto: false
   },
+  {
+    id: "sys_att",
+    name: "Điểm danh hôm nay 📍",
+    reward: 5,
+    auto: true  // trigger: hoàn thành ít nhất 1 focus session
+  },
 ];
 
 
 // ===== DỮ LIỆU SHOP =====
-// Các item có thể mở khoá bằng xu (chức năng thực tế sẽ thêm sau)
 const SHOP_ITEMS = [
-  { id: "shop_1", icon: "⏱", name: "Custom Timer",  desc: "Tự điều chỉnh thời gian focus/break", price: 50  },
-  { id: "shop_2", icon: "🎵", name: "Ambient Music", desc: "Mở khoá nhạc nền khi focus",          price: 80  },
-  { id: "shop_3", icon: "🌤", name: "Thời tiết",     desc: "Hiển thị thời tiết theo vị trí",      price: 60  },
-  { id: "shop_4", icon: "🎨", name: "Dark Theme",    desc: "Giao diện tối cao cấp hơn",           price: 40  },
-  { id: "shop_5", icon: "📊", name: "Thống kê",      desc: "Xem lịch sử focus theo tuần",         price: 100 },
-  { id: "shop_6", icon: "🔔", name: "Thông báo",     desc: "Nhắc nhở theo lịch trình",            price: 30  },
+  { id: "shop_1", icon: "⏱", name: "Custom Timer",   desc: "Tự điều chỉnh thời gian focus/break", price: 50  },
+  { id: "shop_2", icon: "🔗", name: "Link nhạc ngoài", desc: "Chèn link nhạc YouTube/SoundCloud vào player", price: 80  },
+  { id: "shop_4", icon: "🎨", name: "Dark Theme",      desc: "Giao diện tối cao cấp hơn",           price: 40  },
+  { id: "shop_5", icon: "📊", name: "Thống kê",        desc: "Xem lịch sử focus theo tuần",         price: 100 },
+  { id: "shop_6", icon: "🔔", name: "Thông báo",       desc: "Nhắc nhở theo lịch trình",            price: 30  },
 ];
 
 
 // ===== STORAGE =====
-// Trả về ngày hôm nay dạng "YYYY-MM-DD" để so sánh reset hàng ngày
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
 
-// Đọc state từ localStorage, trả về {} nếu lỗi
 function loadState() {
   try { return JSON.parse(localStorage.getItem("focusroom_tasks")) || {}; }
   catch { return {}; }
 }
 
-// Ghi toàn bộ state hiện tại vào localStorage
 function saveState() {
   localStorage.setItem("focusroom_tasks", JSON.stringify(state));
+}
+
+// ===== ĐIỂM DANH / STREAK =====
+const ATTENDANCE_KEY = "focusroom_attendance"; // { dates: ["YYYY-MM-DD", ...] }
+
+function loadAttendance() {
+  try { return JSON.parse(localStorage.getItem(ATTENDANCE_KEY)) || { dates: [] }; }
+  catch { return { dates: [] }; }
+}
+
+function saveAttendance(data) {
+  localStorage.setItem(ATTENDANCE_KEY, JSON.stringify(data));
+}
+
+// Đánh dấu điểm danh hôm nay
+function markAttendanceToday() {
+  const att  = loadAttendance();
+  const today = todayKey();
+  if (!att.dates.includes(today)) {
+    att.dates.push(today);
+    saveAttendance(att);
+  }
+  // Thông báo cho journal.js biết để cập nhật streak + lịch
+  window.dispatchEvent(new CustomEvent("attendanceUpdated"));
+}
+
+// Tính chuỗi ngày học liên tiếp
+function calcStreak() {
+  const att   = loadAttendance();
+  const dates = att.dates.slice().sort(); // sắp xếp tăng dần
+  if (!dates.length) return 0;
+
+  let streak = 0;
+  let cur    = new Date();
+  cur.setHours(0, 0, 0, 0);
+
+  // Kiểm tra từ hôm nay trở về trước
+  for (let i = 0; i < 365; i++) {
+    const key = cur.toISOString().slice(0, 10);
+    if (dates.includes(key)) {
+      streak++;
+      cur.setDate(cur.getDate() - 1);
+    } else {
+      break; // chuỗi đứt
+    }
+  }
+  return streak;
 }
 
 
@@ -141,10 +189,16 @@ function handleFocusSessionDone(detail) {
   state.focusCount = focusCount;
   saveState();
 
-  // Kiểm tra và auto-complete từng task theo điều kiện
-  tryAutoComplete("sys_1");                          // >= 1 session
-  if (focusCount >= 3) tryAutoComplete("sys_2");     // >= 3 session
-  if (cycleComplete)   tryAutoComplete("sys_3");     // hoàn thành cả chu kỳ
+  tryAutoComplete("sys_1");
+  if (focusCount >= 3) tryAutoComplete("sys_2");
+  if (cycleComplete)   tryAutoComplete("sys_3");
+
+  // Điểm danh: hoàn thành ít nhất 1 focus → tự động điểm danh hôm nay
+  const attDone = state.systemDone.includes("sys_att");
+  if (!attDone) {
+    tryAutoComplete("sys_att");
+    markAttendanceToday(); // lưu vào attendance storage
+  }
 }
 
 // Thử đánh dấu hoàn thành task tự động (chỉ thực hiện nếu chưa done)
@@ -255,15 +309,14 @@ function renderShop() {
   shopGrid.innerHTML = "";
 
   SHOP_ITEMS.forEach(item => {
-    const owned      = state.shopOwned.includes(item.id);
-    const canBuy     = item.id === "shop_1"; // chỉ shop_1 (Custom Timer) đã triển khai
-    const canAfford  = state.coins >= item.price;
-    const div        = document.createElement("div");
+    const owned     = state.shopOwned.includes(item.id);
+    // shop_1 (Custom Timer) và shop_2 (Link nhạc) đã triển khai, có thể mua
+    const canBuy    = item.id === "shop_1" || item.id === "shop_2";
+    const canAfford = state.coins >= item.price;
+    const div       = document.createElement("div");
 
-    // Phân loại trạng thái: owned / buyable / coming-soon
     div.className = "shop-item " + (owned ? "unlocked" : canBuy ? "locked buyable" : "locked coming-soon");
 
-    // Tooltip "sẽ sớm phát triển" cho các item chưa triển khai
     if (!owned && !canBuy) {
       div.title = "Tính năng sẽ sớm phát triển";
     }
@@ -287,12 +340,9 @@ function renderShop() {
       </div>
     `;
 
-    // Gán sự kiện mua cho shop_1
-    if (!owned && canBuy) {
-      const buyBtn = div.querySelector(".buy-btn");
-      if (buyBtn && canAfford) {
-        buyBtn.addEventListener("click", () => purchaseItem(item));
-      }
+    // Gán sự kiện mua cho item đã triển khai
+    if (!owned && canBuy && canAfford) {
+      div.querySelector(".buy-btn").addEventListener("click", () => purchaseItem(item));
     }
 
     shopGrid.appendChild(div);
@@ -300,33 +350,27 @@ function renderShop() {
 }
 
 // ===== MUA ITEM SHOP =====
-// Xử lý mua item: trừ xu, lưu state, áp dụng hiệu ứng
 function purchaseItem(item) {
-  if (state.coins < item.price) return; // double-check
+  if (state.coins < item.price) return;
 
   state.coins -= item.price;
   state.shopOwned.push(item.id);
   saveState();
   renderCoin();
 
-  // Áp dụng hiệu ứng thực tế theo item
-  if (item.id === "shop_1") {
-    activateCustomTimer(); // mở khoá custom timer panel
-  }
+  if (item.id === "shop_1") activateCustomTimer();
+  if (item.id === "shop_2") activateMusicLink();
 
-  renderShop(); // render lại để cập nhật trạng thái
+  renderShop();
 }
 
 // ===== MỞ KHOÁ CUSTOM TIMER =====
-// Khi mua shop_1: hiện nút Custom trong timer, nếu đang ẩn
 function activateCustomTimer() {
   const customBtn = document.getElementById("customBtn");
   if (customBtn) {
-    // Xoá trạng thái khoá (nếu có) và đảm bảo hiển thị
     customBtn.classList.remove("locked-feature");
     customBtn.removeAttribute("disabled");
     customBtn.title = "";
-    // Hiệu ứng nhấp nháy nhẹ để báo mở khoá thành công
     customBtn.style.transition = "all 0.3s ease";
     customBtn.style.borderColor = "#f5c842";
     customBtn.style.color = "#f5c842";
@@ -335,6 +379,28 @@ function activateCustomTimer() {
       customBtn.style.color = "";
     }, 1500);
   }
+}
+
+// ===== MỞ KHOÁ LINK NHẠC NGOÀI =====
+function activateMusicLink() {
+  const linkBtn   = document.getElementById("musicLinkBtn");
+  const linkPanel = document.getElementById("musicLinkPanel");
+
+  if (linkBtn) {
+    linkBtn.style.display = "flex";
+    linkBtn.style.transition  = "all 0.3s ease";
+    linkBtn.style.borderColor = "#f5c842";
+    linkBtn.style.color       = "#f5c842";
+    setTimeout(() => {
+      linkBtn.style.borderColor = "";
+      linkBtn.style.color       = "";
+    }, 1500);
+  }
+
+  if (linkPanel) linkPanel.classList.remove("ml-locked");
+
+  // Thông báo cho music.js biết đã mở khoá
+  window.dispatchEvent(new CustomEvent("musicLinkUnlocked"));
 }
 
 
@@ -435,22 +501,34 @@ window.addEventListener("focusSessionDone", e => handleFocusSessionDone(e.detail
 
 
 // ===== KHỞI TẠO CUSTOM TIMER =====
-// Nếu shop_1 chưa được mua: khoá nút Custom trong timer
-// Nếu đã mua rồi: kích hoạt bình thường
 (function initCustomTimerState() {
   const customBtn = document.getElementById("customBtn");
   if (!customBtn) return;
-
   if (state.shopOwned.includes("shop_1")) {
-    // Đã sở hữu: đảm bảo hoạt động bình thường
     customBtn.classList.remove("locked-feature");
     customBtn.removeAttribute("disabled");
     customBtn.title = "";
   } else {
-    // Chưa mua: thêm class khoá, tooltip gợi ý mua ở Shop
     customBtn.classList.add("locked-feature");
     customBtn.disabled = true;
     customBtn.title = "Mua ở Shop để mở khoá (50 xu)";
+  }
+})();
+
+// ===== KHỞI TẠO LINK NHẠC =====
+// Ẩn nút 🔗 nếu chưa mua shop_2, hiện nếu đã mua
+(function initMusicLinkState() {
+  const linkBtn   = document.getElementById("musicLinkBtn");
+  const linkPanel = document.getElementById("musicLinkPanel");
+  if (!linkBtn) return;
+
+  if (state.shopOwned.includes("shop_2")) {
+    // Đã mua: hiện nút và panel bình thường
+    linkBtn.style.display = "flex";
+  } else {
+    // Chưa mua: ẩn nút 🔗 và panel
+    linkBtn.style.display = "none";
+    if (linkPanel) linkPanel.classList.add("ml-hidden");
   }
 })();
 

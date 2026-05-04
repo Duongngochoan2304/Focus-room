@@ -325,6 +325,29 @@ document.addEventListener("keydown", e => {
   }
 });
 
+// ===== STREAK BOX =====
+function renderStreakBox() {
+  let box = document.getElementById("journalStreakBox");
+  if (!box) {
+    // Tạo lần đầu — chèn vào cuối calendarPage, dưới lưới ngày
+    box = document.createElement("div");
+    box.id = "journalStreakBox";
+    const calPage = document.getElementById("calendarPage");
+    if (calPage) calPage.appendChild(box);
+  }
+  const streak = calcStreak();
+  const flame  = streak > 0 ? "🔥" : "💤";
+  box.innerHTML = `
+    <span class="streak-flame">${flame}</span>
+    <span class="streak-count">${streak}</span>
+    <span class="streak-label">ngày liên tiếp</span>
+  `;
+}
+
+// Lắng nghe event từ tasks.js khi điểm danh mới
+window.addEventListener("attendanceUpdated", () => {
+  renderCalendar(); // render lại để cập nhật viền cam + streak
+});
 
 // ===== KHỞI TẠO =====
 // Render lịch tháng hiện tại khi page load

@@ -306,7 +306,7 @@ musicTitleWrapper.addEventListener("mouseleave", () => {
 let ytPlayer       = null;
 let isYouTubeMode  = false;
 let ytReady        = false;
-let ytPendingId    = null; // videoId chờ API load xong
+let ytPendingId    = null;
 
 // Tham chiếu DOM link panel
 const musicLinkBtn      = document.getElementById("musicLinkBtn");
@@ -316,14 +316,53 @@ const musicLinkApplyBtn = document.getElementById("musicLinkApplyBtn");
 const musicLinkClearBtn = document.getElementById("musicLinkClearBtn");
 const musicLinkStatus   = document.getElementById("musicLinkStatus");
 
-// Load YouTube IFrame API động
-(function() {
-  const tag = document.createElement('script');
-  tag.src   = "https://www.youtube.com/iframe_api";
-  document.head.appendChild(tag);
-})();
+// ===== KIỂM TRA ĐÃ MUA SHOP_2 CHƯA =====
+// Đọc thẳng từ localStorage — music.js chạy độc lập với tasks.js
+function isMusicLinkUnlocked() {
+  try {
+    const state = JSON.parse(localStorage.getItem("focusroom_tasks")) || {};
+    return Array.isArray(state.shopOwned) && state.shopOwned.includes("shop_2");
+  } catch {
+    return false;
+  }
+}
 
-// Callback YouTube gọi khi API sẵn sàng
+// Áp dụng trạng thái khoá/mở cho toàn bộ link UI
+function applyMusicLinkLockState() {
+  const unlocked = isMusicLinkUnlocked();
+  if (musicLinkBtn) {
+    // Luôn hiện nút — nhưng khoá khi chưa mua
+    musicLinkBtn.style.display = "flex";
+    if (unlocked) {
+      musicLinkBtn.classList.remove("ml-locked");
+      musicLinkBtn.title = "Gắn link YouTube";
+    } else {
+      musicLinkBtn.classList.add("ml-locked");
+      musicLinkBtn.title = "🔒 Mua 'Link nhạc ngoài' trong Shop (80 xu) để mở khoá";
+    }
+  }
+  if (musicLinkPanel && !unlocked) {
+    musicLinkPanel.classList.add("ml-hidden");
+  }
+}
+
+// Chạy ngay khi script load
+applyMusicLinkLockState();
+
+// Lắng nghe event mở khoá từ tasks.js (sau khi mua shop_2)
+window.addEventListener("musicLinkUnlocked", () => {
+  applyMusicLinkLockState();
+});
+
+// Load YouTube IFrame API — chỉ load nếu đã mở khoá (tiết kiệm request)
+if (isMusicLinkUnlocked()) {
+  (function() {
+    const tag = document.createElement('script');
+    tag.src   = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+  })();
+}
+
 window.onYouTubeIframeAPIReady = function() {
   ytReady = true;
   if (ytPendingId) {
@@ -436,9 +475,14 @@ function deactivateYouTubeMode() {
   musicLinkInput.value = "";
 }
 
-// Toggle mở / đóng link panel
+// Toggle mở / đóng link panel — hiện tooltip nếu chưa mở khoá
 musicLinkBtn.addEventListener("click", (e) => {
   e.stopPropagation();
+  if (!isMusicLinkUnlocked()) {
+    // Hiện thông báo nhỏ ngay dưới nút
+    showLockToast();
+    return;
+  }
   musicLinkPanel.classList.toggle("ml-hidden");
   musicLinkBtn.classList.toggle("ml-btn-active");
   if (!musicLinkPanel.classList.contains("ml-hidden")) {
@@ -446,13 +490,68 @@ musicLinkBtn.addEventListener("click", (e) => {
   }
 });
 
-// Xử lý apply link
+// Toast thông báo khoá — hiện tạm 2.5s rồi tự ẩn
+let lockToastTimer = null;
+function showLockToast() {
+  let toast = document.getElementById("mlLockToast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "mlLockToast";
+    toast.style.cssText = `
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      white-space: nowrap;
+      background: rgba(18,5,30,0.97);
+      border: 1px solid rgba(155,77,181,0.4);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.06em;
+      color: rgba(240,230,223,0.75);
+      pointer-events: none;
+      z-index: 300;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    `;
+    toast.textContent = "🔒 Mua trong Shop để mở khoá (80 xu)";
+    // Cần parent có position:relative — musicLinkBtn có sẵn
+    musicLinkBtn.style.position = "relative";
+    musicLinkBtn.appendChild(toast);
+  }
+  clearTimeout(lockToastTimer);
+  // Hiện
+  requestAnimationFrame(() => {
+    toast.style.opacity   = "1";
+    toast.style.transform = "translateY(0)";
+  });
+  // Tự ẩn sau 2.5s
+  lockToastTimer = setTimeout(() => {
+    toast.style.opacity   = "0";
+    toast.style.transform = "translateY(-4px)";
+  }, 2500);
+}
+
+// Xử lý apply link — chỉ hoạt động khi đã mở khoá
 function applyYouTubeLink() {
+  if (!isMusicLinkUnlocked()) return;
   const url = musicLinkInput.value.trim();
   if (!url) return;
   const videoId = parseYouTubeId(url);
   if (!videoId) {
     setLinkStatus("❌ Link không hợp lệ!", "rgba(220,80,80,0.8)");
+    return;
+  }
+  // Load YT API lần đầu nếu chưa có (mua xong mới load)
+  if (!ytReady && !document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+    const tag = document.createElement('script');
+    tag.src   = "https://www.youtube.com/iframe_api";
+    tag.onload = () => { ytPendingId = videoId; };
+    document.head.appendChild(tag);
+    setLinkStatus("⏳ Đang tải YouTube API...");
     return;
   }
   activateYouTubeMode(videoId);
@@ -463,7 +562,7 @@ musicLinkInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") applyYouTubeLink();
 });
 
-// Nút xoá: nếu đang phát YouTube → dừng và về playlist; ngược lại chỉ xoá input
+// Nút xoá
 musicLinkClearBtn.addEventListener("click", () => {
   if (isYouTubeMode) {
     deactivateYouTubeMode();
