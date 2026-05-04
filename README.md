@@ -65,20 +65,6 @@ Các tính năng dự kiến bổ sung:
 
 ---
 
-## Cài đặt local
-
-Clone repository:
-
-```bash
-git clone https://github.com/duongngochoan2304/Focus-room.git
-```
-
-Di chuyển vào thư mục project:
-
-```bash
-cd Focus-room
-```
-
 
 ## Author
 Developed by **Hoan Duong**
