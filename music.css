@@ -348,7 +348,7 @@
    Nếu dùng <img> làm icon: thêm vào .wn-icon img
    .wn-icon img { width: 18px; height: 18px; }
 ====================================================== */
-
+.wn-icon img { width: 18px; height: 18px; }
 /* Label tên âm thanh */
 .wn-label {
   font-family: 'DM Mono', monospace;
