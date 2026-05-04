@@ -482,7 +482,14 @@ if (document.getElementById("floatPauseBtn")) {
     savePos();
   });
 })();
+// ===== ÂM THANH THÔNG BÁO =====
+const alarmAudio = new Audio("sounds/bao_thuc.mp3");
+alarmAudio.volume = 0.8;
 
+function playAlarm() {
+  alarmAudio.currentTime = 0;
+  alarmAudio.play().catch(err => console.warn("Alarm error:", err));
+}
 
 // ===== KHỞI TẠO =====
 uiFull.classList.add("hidden");
