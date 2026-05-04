@@ -54,8 +54,8 @@ Tuỳ chỉnh không gian học tập với hiệu ứng nền:
 
 ## Các tính năng dự kiến bổ sung
 - 🔥 **Daily Streak System**
-  Theo dõi số ngày đăng nhập liên tiếp
-  Tăng động lực duy trì thói quen học tập
+  - Theo dõi số ngày đăng nhập liên tiếp
+  - Tăng động lực duy trì thói quen học tập
 - 🌍 **Multiplayer Study Room**  
   Cho phép nhiều người cùng tham gia một phòng học ảo để học nhóm và tăng động lực.
 
