@@ -49,8 +49,8 @@ Tuỳ chỉnh không gian học tập với hiệu ứng nền:
 ---
 
 ## Công nghệ sử dụng
-- HTML5
-- CSS3
+- HTML
+- CSS
 - JavaScript
 - Three.js
 
