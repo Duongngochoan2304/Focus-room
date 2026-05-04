@@ -10,7 +10,7 @@ import { setupLighting, enableModelShadow, updateLightTarget } from "./lighting.
 
 
 // ===== PATH =====
-const GLB_PATH = '/gkuet.glb';
+const GLB_PATH = './232.glb';
 
 // ===== CACHE KEY — đổi version khi update file GLB để xoá cache cũ =====
 const CACHE_KEY     = 'focusroom_glb_v1';
@@ -134,13 +134,13 @@ let phi     = 0.1;    // góc dọc (polar), radian — 0=nhìn thẳng
 // Giới hạn xoay và zoom
 const PHI_MIN    = -0.3;   // không xoay quá lên trên
 const PHI_MAX    =  1.5;   // không xoay quá xuống dưới
-const THETA_MIN  = -0.3;   // giới hạn xoay trái
-const THETA_MAX  =  1.5;   // giới hạn xoay phải
+const THETA_MIN = -Infinity;
+const THETA_MAX = Infinity;
 const RADIUS_MIN =  0.1;     // zoom in tối đa
-const RADIUS_MAX = 20;     // zoom out tối đa
+const RADIUS_MAX = 200;     // zoom out tối đa
 
 // Tốc độ
-const ROTATE_SPEED = 0.005; // radian / pixel kéo chuột
+const ROTATE_SPEED = 0.006; // radian / pixel kéo chuột
 const ZOOM_SPEED   = 1.5;   // đơn vị / scroll tick
 const EASE         = 0.1;   // easing mượt (0=đứng im, 1=tức thì)
 
@@ -255,6 +255,7 @@ loader.load(
     const center = box.getCenter(new THREE.Vector3());
     const size   = box.getSize(new THREE.Vector3());
 
+
     // Bật shadow
     enableModelShadow(gltf.scene);
 
@@ -285,6 +286,8 @@ loader.load(
 
       child.material = Array.isArray(child.material) ? converted : converted[0];
       child.material.needsUpdate = true;
+      child.material.roughness = 1;
+      child.material.metalness = 0;
     });
 
     // Cập nhật camera target

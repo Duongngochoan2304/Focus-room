@@ -24,8 +24,8 @@ export function setupLighting(scene, renderer) {
   // =====================================================
 
   const ambientLight = new THREE.AmbientLight(
-    0xb6b5ed, // MÀU ÁNH SÁNG PHỤ — đổi màu tại đây
-              // gợi ý: 0xb6b5ed xanh đêm | 0xffd6f0 tím hồng | 0xffffff trắng
+    0xffd6f0, // MÀU ÁNH SÁNG PHỤ — đổi màu tại đây
+              // gợi ý: 0xb6b5ed xanh đêm | 0xffd6f0 tím hồng | 0xffffff trắng  | f1faff xanh sáng
     1       // CƯỜNG ĐỘ ÁNH SÁNG PHỤ — tăng giảm tại đây
               // 0.0 = tối hoàn toàn | 0.5 = sáng vừa | 1.0+ = sáng nhiều
   );
@@ -42,19 +42,19 @@ export function setupLighting(scene, renderer) {
     0xfff2cc,    // MÀU ÁNH SÁNG CHÍNH — đổi màu tại đây
                  // gợi ý: 0xfff2cc vàng ấm | 0xffffff trắng | 0xffe0b2 cam nhẹ
 
-    4,           // CƯỜNG ĐỘ ÁNH SÁNG — tăng giảm tại đây
+    5,           // CƯỜNG ĐỘ ÁNH SÁNG — tăng giảm tại đây
                  // 2 = yếu | 5 = vừa | 10 = rất sáng
 
     10,          // KHOẢNG CÁCH CHIẾU XA — ánh sáng đi được bao xa (world units)
                  // 10 = gần | 25 = vừa | 50 = rất xa
 
-    Math.PI / 3, // ĐỘ TO CỦA VÒNG TRÒN HẮT XUỐNG NỀN (góc hình nón, radians)
+    Math.PI / 4, // ĐỘ TO CỦA VÒNG TRÒN HẮT XUỐNG NỀN (góc hình nón, radians)
                  // Math.PI / 8  (~22°) = vòng nhỏ, tập trung
                  // Math.PI / 6  (~30°) = vòng vừa  <-- hiện tại
                  // Math.PI / 4  (~45°) = vòng rộng
                  // Math.PI / 3  (~60°) = rất rộng
 
-    0.5,         // ĐỘ MỀM CỦA MÉP ÁNH SÁNG (penumbra)
+    0.8,         // ĐỘ MỀM CỦA MÉP ÁNH SÁNG (penumbra)
                  // 0.0 = mép cứng, rõ nét
                  // 0.4 = mép mờ dần tự nhiên  <-- hiện tại
                  // 1.0 = mép rất mờ
@@ -99,7 +99,7 @@ export function updateLightTarget(center) {
   // TOẠ ĐỘ ĐÈN — đặt ngay trên tâm model
   mainLight.position.set(
     center.x,       // X: bằng tâm model
-    center.y + 1,   // Y: cao hơn tâm 8 đơn vị — chỉnh con số này nếu muốn đèn cao/thấp hơn
+    center.y + 0.5,   // Y: cao hơn tâm 8 đơn vị — chỉnh con số này nếu muốn đèn cao/thấp hơn
     center.z        // Z: bằng tâm model
   );
 
