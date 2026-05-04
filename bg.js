@@ -177,7 +177,7 @@ const EFFECTS = {
               s.len=0.1+Math.random()*0.15;
               // Spawn từ trên-phải, bay sang dưới-trái
               s.x=0.2+Math.random()*0.9; s.y=0.3+Math.random()*0.7;
-              const angle=Math.PI*(0.55+Math.random()*0.2); // ~200-215°
+              const angle = Math.PI * (1.11 + Math.random() * 0.08); // góc 200–215° 
               const spd=0.018+Math.random()*0.015;
               s.vx=Math.cos(angle)*spd; s.vy=Math.sin(angle)*spd;
             }
