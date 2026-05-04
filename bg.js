@@ -150,7 +150,7 @@ const EFFECTS = {
         fragmentShader:`void main(){gl_FragColor=vec4(1.,0.95,1.,0.9);}`
       });
       const shootObj = addObj(new THREE.LineSegments(shootGeo,shootMat));
-      shootObj.userData = {shootPos,shootData,MAX_SHOOT,nextShoot:4+Math.random()*6};
+      shootObj.userData = {shootPos,shootData,MAX_SHOOT,nextShoot:0.5+Math.random()*1.5,lastT:-1};
     },
     update(t){
       sceneObjects.forEach(o=>{
@@ -167,7 +167,9 @@ const EFFECTS = {
         // Sao băng update
         if(o.userData.shootData){
           const {shootPos,shootData,MAX_SHOOT} = o.userData;
-          o.userData.nextShoot -= 0.016;
+          const dt = o.userData.lastT < 0 ? 0.016 : t - o.userData.lastT;
+o.userData.lastT = t;
+o.userData.nextShoot -= dt;
           // Spawn sao băng mới
           if(o.userData.nextShoot <= 0){
             const idx = shootData.findIndex(s=>!s.active);
@@ -187,7 +189,7 @@ const EFFECTS = {
           for(let i=0;i<MAX_SHOOT;i++){
             const s=shootData[i];
             if(!s.active){shootPos[i*6]=shootPos[i*6+3]=10;continue;}
-            s.x+=s.vx; s.y+=s.vy; s.life+=0.016;
+            s.x+=s.vx; s.y+=s.vy; s.life+=dt;
             const fade=1-s.life/s.maxLife;
             // Đầu sao băng
             shootPos[i*6]  =s.x;      shootPos[i*6+1]=s.y;      shootPos[i*6+2]=0;
