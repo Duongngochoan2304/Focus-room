@@ -232,10 +232,12 @@ function startTimer() {
         updateProgress();
         updateStatusText("Done! 🎉");
         updateDisplay();
+        playAlarm();
         return;
       }
 
       // Chuyển sang mode tiếp theo và tự động start
+      playAlarm();
       switchMode();
       updateDisplay();
       startTimer();
