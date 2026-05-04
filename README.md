@@ -49,6 +49,7 @@ Tuỳ chỉnh không gian học tập với hiệu ứng nền:
 - CSS
 - JavaScript
 - Three.js
+- Blender
 
 ---
 
