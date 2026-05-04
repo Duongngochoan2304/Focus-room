@@ -44,7 +44,7 @@ Tuỳ chỉnh không gian học tập với hiệu ứng nền:
 ---
 
 ## Demo
-🔗 https://duongngochoan2304.github.io/Focus-room/
+🔗 [https://duongngochoan2304.github.io/Focus-room/](https://duongngochoan2304.github.io/Focus-room/)
 
 ---
 
