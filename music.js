@@ -276,7 +276,19 @@ wnOptions.forEach(btn => {
     }
   });
 });
-
+// Nút tắt white noise
+const wnOffBtn = document.getElementById("wnOffBtn");
+if (wnOffBtn) {
+  wnOffBtn.addEventListener("click", () => {
+    if (activeNoiseBtn) {
+      noiseAudio.pause();
+      noiseAudio.src = "";
+      activeNoiseBtn.classList.remove("wn-active");
+      activeNoiseBtn = null;
+      whiteNoiseBtn.classList.remove("wn-noise-on");
+    }
+  });
+}
 
 // ===== MARQUEE — tên bài chạy khi hover nếu dài =====
 function setupMarquee() {
