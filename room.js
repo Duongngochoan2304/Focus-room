@@ -128,8 +128,8 @@ setupLighting(scene, renderer);
 // Dùng spherical coordinates để xoay quanh target
 let target  = new THREE.Vector3(6.35, 2.45, 0); // điểm nhìn
 let radius  = 25;     // khoảng cách camera → target (zoom)
-let theta   = 0;      // góc ngang (azimuth), radian
-let phi     = 0.1;    // góc dọc (polar), radian — 0=nhìn thẳng
+let theta   = 0.6;      // góc ngang (azimuth), radian
+let phi     = 0.2;    // góc dọc (polar), radian — 0=nhìn thẳng
 
 // Giới hạn xoay và zoom
 const PHI_MIN    = -0.3;   // không xoay quá lên trên
@@ -137,7 +137,7 @@ const PHI_MAX    =  1.5;   // không xoay quá xuống dưới
 const THETA_MIN = -Infinity;
 const THETA_MAX = Infinity;
 const RADIUS_MIN =  0.1;     // zoom in tối đa
-const RADIUS_MAX = 200;     // zoom out tối đa
+const RADIUS_MAX = 20;     // zoom out tối đa
 
 // Tốc độ
 const ROTATE_SPEED = 0.006; // radian / pixel kéo chuột
