@@ -133,34 +133,24 @@ const EFFECTS = {
           }`});
       const s3o=addObj(new THREE.Points(g3,m3));s3o.userData={mat:m3,phase:ph3};
 
-      // Lớp 4: sao băng — dùng Points với đuôi trail
-      const MAX_SHOOT = 6, TRAIL_LEN = 10;
-      const TOTAL_PTS = MAX_SHOOT * (1 + TRAIL_LEN);
-      const shootPos   = new Float32Array(TOTAL_PTS * 3);
-      const shootAlpha = new Float32Array(TOTAL_PTS);
-      const shootSize  = new Float32Array(TOTAL_PTS);
-      for(let i=0;i<TOTAL_PTS;i++){ shootPos[i*3]=10; shootPos[i*3+1]=10; shootAlpha[i]=0; shootSize[i]=1; }
-      const shootData = [];
-      for(let i=0;i<MAX_SHOOT;i++)
-        shootData.push({active:false,x:0,y:0,vx:0,vy:0,life:0,maxLife:1,
-          trail:Array.from({length:TRAIL_LEN},()=>({x:10,y:10}))});
+      // Lớp 4: sao băng — sinh ra định kỳ, bay qua màn hình
+      // Dùng LineSegments, mỗi sao băng là 1 vạch sáng dài
+      const MAX_SHOOT = 6;
+      const shootPos  = new Float32Array(MAX_SHOOT * 6); // 2 điểm × 3
+      const shootData = []; // {active, x, y, vx, vy, life, maxLife, len}
+      for(let i=0;i<MAX_SHOOT;i++){
+        shootData.push({active:false,x:0,y:0,vx:0,vy:0,life:0,maxLife:1,len:.12});
+        shootPos[i*6]=shootPos[i*6+3]=shootPos[i*6+1]=shootPos[i*6+4]=10; // ngoài màn
+      }
       const shootGeo = new THREE.BufferGeometry();
-      const posAttr   = new THREE.BufferAttribute(shootPos,3);   posAttr.setUsage(THREE.DynamicDrawUsage);
-      const alphaAttr = new THREE.BufferAttribute(shootAlpha,1); alphaAttr.setUsage(THREE.DynamicDrawUsage);
-      const sizeAttr  = new THREE.BufferAttribute(shootSize,1);  sizeAttr.setUsage(THREE.DynamicDrawUsage);
-      shootGeo.setAttribute('position', posAttr);
-      shootGeo.setAttribute('alpha',    alphaAttr);
-      shootGeo.setAttribute('psize',    sizeAttr);
+      shootGeo.setAttribute('position',new THREE.BufferAttribute(shootPos,3));
       const shootMat = new THREE.ShaderMaterial({
         transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
-        vertexShader:`attribute float alpha;attribute float psize;varying float vA;
-          void main(){vA=alpha;gl_PointSize=psize;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-        fragmentShader:`varying float vA;
-          void main(){float d=length(gl_PointCoord-0.5)*2.;float a=(1.-smoothstep(0.,.9,d))*vA;
-          gl_FragColor=vec4(1.,0.97,1.,a);}`
+        vertexShader:`void main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+        fragmentShader:`void main(){gl_FragColor=vec4(1.,0.95,1.,0.9);}`
       });
-      const shootObj = addObj(new THREE.Points(shootGeo, shootMat));
-      shootObj.userData = {shootPos,shootAlpha,shootSize,shootData,MAX_SHOOT,TRAIL_LEN,nextShoot:0,lastT:-1};
+      const shootObj = addObj(new THREE.LineSegments(shootGeo,shootMat));
+      shootObj.userData = {shootPos,shootData,MAX_SHOOT,nextShoot:4+Math.random()*6};
     },
     update(t){
       sceneObjects.forEach(o=>{
@@ -176,50 +166,36 @@ const EFFECTS = {
         }
         // Sao băng update
         if(o.userData.shootData){
-          const {shootPos,shootAlpha,shootSize,shootData,MAX_SHOOT,TRAIL_LEN}=o.userData;
-          const dt=o.userData.lastT<0?0.016:Math.min(t-o.userData.lastT,0.05);
-          o.userData.lastT=t;
-          o.userData.nextShoot-=dt;
-          if(o.userData.nextShoot<=0){
-            const idx=shootData.findIndex(s=>!s.active);
+          const {shootPos,shootData,MAX_SHOOT} = o.userData;
+          o.userData.nextShoot -= 0.016;
+          // Spawn sao băng mới
+          if(o.userData.nextShoot <= 0){
+            const idx = shootData.findIndex(s=>!s.active);
             if(idx>=0){
               const s=shootData[idx];
-              s.active=true; s.life=0; s.maxLife=0.5+Math.random()*0.6;
-              s.x=0.2+Math.random()*0.8; s.y=0.2+Math.random()*0.8;
-              const angle=Math.PI*(1.10+Math.random()*0.10);
-              const spd=0.03+Math.random()*0.02;
+              s.active=true; s.life=0; s.maxLife=0.6+Math.random()*0.5;
+              s.len=0.1+Math.random()*0.15;
+              // Spawn từ trên-phải, bay sang dưới-trái
+              s.x=0.2+Math.random()*0.9; s.y=0.3+Math.random()*0.7;
+              const angle = Math.PI * (1.11 + Math.random() * 0.08); // góc 200–215° 
+              const spd=0.018+Math.random()*0.015;
               s.vx=Math.cos(angle)*spd; s.vy=Math.sin(angle)*spd;
-              s.trail.forEach(tr=>{tr.x=s.x;tr.y=s.y;});
             }
-            o.userData.nextShoot=1+Math.random()*3;
+            o.userData.nextShoot = 3+Math.random()*8;
           }
+          // Update từng sao băng
           for(let i=0;i<MAX_SHOOT;i++){
             const s=shootData[i];
-            const base=(1+TRAIL_LEN)*i;
-            if(!s.active){
-              for(let k=0;k<=TRAIL_LEN;k++){shootAlpha[base+k]=0;shootPos[(base+k)*3]=10;shootPos[(base+k)*3+1]=10;}
-              continue;
-            }
-            // Dịch trail
-            for(let k=TRAIL_LEN-1;k>0;k--){s.trail[k].x=s.trail[k-1].x;s.trail[k].y=s.trail[k-1].y;}
-            s.trail[0].x=s.x; s.trail[0].y=s.y;
-            s.x+=s.vx; s.y+=s.vy; s.life+=dt;
-            const fade=Math.max(0,1-s.life/s.maxLife);
-            // Đầu
-            shootPos[base*3]=s.x; shootPos[base*3+1]=s.y; shootPos[base*3+2]=0;
-            shootAlpha[base]=fade; shootSize[base]=15;
-            // Đuôi
-            for(let k=0;k<TRAIL_LEN;k++){
-              const b=base+1+k;
-              shootPos[b*3]=s.trail[k].x; shootPos[b*3+1]=s.trail[k].y; shootPos[b*3+2]=0;
-              shootAlpha[b]=fade*(1-(k+1)/TRAIL_LEN)*0.8;
-              shootSize[b]=Math.max(2,10*(1-(k+1)/TRAIL_LEN));
-            }
-            if(s.life>=s.maxLife||s.x<-1.3||s.y<-1.3)s.active=false;
+            if(!s.active){shootPos[i*6]=shootPos[i*6+3]=10;continue;}
+            s.x+=s.vx; s.y+=s.vy; s.life+=0.016;
+            const fade=1-s.life/s.maxLife;
+            // Đầu sao băng
+            shootPos[i*6]  =s.x;      shootPos[i*6+1]=s.y;      shootPos[i*6+2]=0;
+            // Đuôi sao băng (ngược hướng bay)
+            shootPos[i*6+3]=s.x-s.vx/0.016*s.len; shootPos[i*6+4]=s.y-s.vy/0.016*s.len; shootPos[i*6+5]=0;
+            if(s.life>=s.maxLife||s.x<-1.3||s.y<-1.3) s.active=false;
           }
           o.geometry.attributes.position.needsUpdate=true;
-          o.geometry.attributes.alpha.needsUpdate=true;
-          o.geometry.attributes.psize.needsUpdate=true;
         }
       });
     },
