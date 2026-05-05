@@ -11,6 +11,10 @@ Focus Room là ứng dụng hỗ trợ học tập và làm việc tập trung t
 
 ---
 
+## Demo
+🔗 [https://duongngochoan2304.github.io/Focus-room/](https://duongngochoan2304.github.io/Focus-room/)
+
+---
 ## Tính năng chính
 
 ### ⏳ Pomodoro Timer
@@ -39,10 +43,6 @@ Tuỳ chỉnh không gian học tập với hiệu ứng nền:
 
 ---
 
-## Demo
-🔗 [https://duongngochoan2304.github.io/Focus-room/](https://duongngochoan2304.github.io/Focus-room/)
-
----
 
 ## Công nghệ sử dụng
 - HTML
