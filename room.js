@@ -128,7 +128,7 @@ setupLighting(scene, renderer);
 // Dùng spherical coordinates để xoay quanh target
 let target  = new THREE.Vector3(6.35, 2.45, 0); // điểm nhìn
 let radius  = 25;     // khoảng cách camera → target (zoom)
-let theta   = 0.6;      // góc ngang (azimuth), radian
+let theta   = 0.7;      // góc ngang (azimuth), radian
 let phi     = 0.2;    // góc dọc (polar), radian — 0=nhìn thẳng
 
 // Giới hạn xoay và zoom
